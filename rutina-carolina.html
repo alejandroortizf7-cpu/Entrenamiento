@@ -231,6 +231,23 @@
     ::-webkit-scrollbar { width: 3px; height: 3px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* Session picker */
+    .sessions-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .sessions-section h3 { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); padding: 14px 16px 10px; }
+    .session-pick-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 13px 16px; cursor: pointer;
+      border-top: 1px solid var(--border); transition: background .15s;
+    }
+    .session-pick-item:active { background: var(--surface2); }
+    .session-pick-item.today { background: rgba(236,72,153,.07); }
+    .session-pick-day { font-size: 12px; font-weight: 700; color: var(--text-muted); width: 36px; flex-shrink: 0; }
+    .session-pick-day.today { color: var(--primary-light); }
+    .session-pick-info { flex: 1; }
+    .session-pick-name { font-size: 14px; font-weight: 700; }
+    .session-pick-done { font-size: 11px; color: var(--accent); font-weight: 600; margin-top: 2px; }
+    .session-pick-chevron { color: var(--text-muted); font-size: 16px; }
   </style>
 </head>
 <body>
@@ -251,6 +268,10 @@
       <div class="tip-title">💡 Progresión doble</div>
       <p>Cuando llegues al rango <strong>alto de reps en todas las series</strong> con buena técnica → sube peso la siguiente sesión.<br>
       Compuestos: <strong>+2,5 kg</strong> · Aislamientos: <strong>+1-2 kg</strong></p>
+    </div>
+    <div class="sessions-section">
+      <h3>Seleccionar sesión</h3>
+      <div id="all-sessions-area"></div>
     </div>
     <div class="meso-section">
       <h3>Semanas del mesociclo</h3>
@@ -589,6 +610,8 @@ function renderHome() {
     grid.appendChild(dot);
   }
 
+  renderAllSessions();
+
   const area = document.getElementById('home-session-area');
   if (!dayKey) {
     area.innerHTML = `<div class="rest-day"><div class="big-icon">🛌</div><h2>Día de descanso</h2><p>Descansa, recupera y come bien.</p></div>`;
@@ -606,6 +629,30 @@ function renderHome() {
         </button>
       </div>`;
   }
+}
+
+function renderAllSessions() {
+  const todayKey = DAY_MAP[new Date().getDay()];
+  const area = document.getElementById('all-sessions-area');
+  const dayOrder = ['lunes','martes','miercoles','jueves','viernes'];
+  const dayShort = { lunes:'Lun', martes:'Mar', miercoles:'Mié', jueves:'Jue', viernes:'Vie' };
+  let html = '';
+  dayOrder.forEach(key => {
+    const session = SESSIONS[key];
+    const isToday = key === todayKey;
+    const logsToday = session.exercises.filter(e => getTodayLogSets(e.id).length > 0).length;
+    const totalEx = session.exercises.length;
+    html += `<div class="session-pick-item${isToday ? ' today' : ''}" onclick="startSession('${key}')">
+      <div class="session-pick-day${isToday ? ' today' : ''}">${dayShort[key]}</div>
+      <div class="session-pick-info">
+        <div class="session-pick-name">${session.name}</div>
+        ${logsToday > 0 ? `<div class="session-pick-done">✓ ${logsToday}/${totalEx} ejercicios hoy</div>` : ''}
+      </div>
+      ${isToday ? '<span style="font-size:11px;font-weight:700;color:var(--primary-light);margin-right:4px;">HOY</span>' : ''}
+      <div class="session-pick-chevron">›</div>
+    </div>`;
+  });
+  area.innerHTML = html;
 }
 
 function startSession(dayKey) {
