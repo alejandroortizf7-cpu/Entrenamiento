@@ -90,6 +90,7 @@
     .rest-day .big-icon { font-size: 64px; }
     .rest-day h2 { font-size: 24px; font-weight: 800; }
     .rest-day p { color: var(--text-dim); font-size: 15px; }
+    .overdue-banner { background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.4); color: #f59e0b; border-radius: var(--radius); padding: 12px 14px; font-size: 13px; font-weight: 600; margin-bottom: 14px; }
     .meso-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
     .meso-section h3 { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; }
     .week-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; }
@@ -292,6 +293,7 @@
       <span class="badge primary" id="home-meso-badge">Mesociclo 9</span>
       <span class="badge accent" id="home-week-badge">Semana 1</span>
     </div>
+    <div id="meso-overdue-banner"></div>
     <div id="home-session-area"></div>
     <div class="sessions-section">
       <h3>Seleccionar sesión</h3>
@@ -366,10 +368,12 @@
           <input type="number" id="settings-meso-num" min="1" style="font-size:18px;padding:12px 10px;" />
         </div>
         <div class="input-grp">
-          <label>Semana (1–8)</label>
-          <input type="number" id="settings-week-num" min="1" max="8" style="font-size:18px;padding:12px 10px;" />
+          <label>Fecha de inicio</label>
+          <input type="date" id="settings-start-date" style="font-size:16px;padding:12px 10px;" />
         </div>
       </div>
+      <p id="settings-week-computed" style="font-size:13px;color:var(--text-dim);margin-top:10px;">Semana calculada: — / 8</p>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:4px;">La semana avanza sola cada 7 días desde la fecha de inicio. Ajusta la fecha si necesitas corregirla.</p>
     </div>
 
     <div class="modal-section">
@@ -379,9 +383,12 @@
     </div>
 
     <div class="modal-section">
-      <h4>Exportar datos</h4>
-      <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px;">Descarga todo el historial de pesos y progresión en un archivo Excel (.csv).</p>
-      <button class="btn btn-secondary" onclick="exportProgressToExcel()">Exportar a Excel</button>
+      <h4>Exportar / respaldar datos</h4>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px;">Descarga todo el historial de pesos y progresión en un archivo Excel (.csv), o reenvíalo a tu Google Sheet de respaldo.</p>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-secondary" onclick="exportProgressToExcel()">Exportar a Excel</button>
+        <button class="btn btn-secondary" onclick="resyncAllToSheet()">Resincronizar todo</button>
+      </div>
     </div>
 
     <div style="display:flex;gap:10px;margin-top:8px;">
@@ -395,91 +402,112 @@
 // ══════════════════════════════════════════════
 // DATA — Sessions
 // ══════════════════════════════════════════════
+// Nombres de ejercicios de mesociclos anteriores, conservados para que el
+// historial guardado (workout_logs) siga mostrando el nombre correcto aunque
+// el ejercicio ya no exista en el SESSIONS del mesociclo actual.
+const ARCHIVED_EXERCISE_NAMES = {
+  lun_1:'Dominada abierto', lun_2:'Jalón al pecho abierto prono', lun_3:'Remo agarre neutro en máquina',
+  lun_4:'Remo libre agarre prono', lun_5:'Pull over', lun_6:'Peck deck invertido', lun_7:'Curl bayesian',
+  lun_8:'Curl predicador unilateral', lun_abs_a:'Crunch en polea con cuerda', lun_abs_b:'Elevación de pies acostado',
+  mar_1:'Aductor de cadera', mar_2:'Sentadilla hack', mar_3:'Sentadilla hack back off (−10% carga)',
+  mar_4:'Extensión de cuádriceps', mar_5:'Curl femoral sentado', mar_6:'Puentes con barra o máquina',
+  mar_7:'Femoral acostado', mar_cal_1:'Elevación de talón',
+  mie_1:'Press inclinado con mancuernas', mie_2:'Peck deck', mie_3:'Vuelos laterales parado con mancuernas (pecho en banco inclinado)',
+  mie_4:'Fondos libres enfoque pecho', mie_5:'Vuelos laterales en polea unilateral', mie_6:'Copa en polea media con cuerda',
+  mie_7:'Extensión 1 mano', mie_abs_a:'Crunch en poleas', mie_abs_b:'Plancha',
+  jue_1:'Dominada abierto agarre neutro', jue_2:'Jalón al pecho abierto agarre prono', jue_3:'Remo cerrado unilateral',
+  jue_4:'Remo en polea abierto prono', jue_5:'Posterior en peck deck invertido', jue_6:'Predicador a 1 mano',
+  jue_7:'Curl con barra recta en polea', jue_cal_1:'Elevación de talón',
+  vie_1:'Femoral acostado unilateral', vie_2:'Peso muerto rumano', vie_3:'Prensa a 2 piernas',
+  vie_4:'Femoral sentado', vie_5:'Extensión de cuads', vie_6:'Hiperextensión glúteo',
+  vie_abs_a:'Crunch en polea con cuerda', vie_abs_b:'Elevación de pies acostado',
+  sab_1:'Press de hombro con mancuernas', sab_2:'Press plano con mancuerna', sab_3:'Vuelo en polea baja',
+  sab_4:'Fondos libres enfoque pecho', sab_5:'Vuelos laterales con mancuerna', sab_6:'Rompe cráneos en banco inclinado',
+  sab_cal_1:'Elevación de talón',
+};
+
 const SESSIONS = {
   lunes: {
     name: 'JALÓN',
     dayName: 'Lunes',
     exercises: [
-      { id:'lun_1', name:'Dominada abierto', presc:'1×fallo', sets:1, rest:0, note:'Activación' },
-      { id:'lun_2', name:'Jalón al pecho abierto prono', presc:'2×10-8', sets:2, rest:120 },
-      { id:'lun_3', name:'Remo agarre neutro en máquina', presc:'2×8-10', sets:2, rest:120 },
-      { id:'lun_4', name:'Remo libre agarre prono', presc:'2×8-10', sets:2, rest:120 },
-      { id:'lun_5', name:'Pull over', presc:'2×12-10-8', sets:2, rest:100 },
-      { id:'lun_6', name:'Peck deck invertido', presc:'2×10-12', sets:2, rest:90 },
-      { id:'lun_7', name:'Curl bayesian', presc:'3×10-8', sets:3, rest:120 },
-      { id:'lun_8', name:'Curl predicador unilateral', presc:'2×8-10', sets:2, rest:120 },
-      { id:'lun_abs_a', name:'Crunch en polea con cuerda', presc:'3×12-10', sets:3, rest:null, group:'lun_abs', groupType:'abs', groupLabel:'ABS — Biserie', groupRole:'A' },
-      { id:'lun_abs_b', name:'Elevación de pies acostado', presc:'3×fallo', sets:3, rest:120, group:'lun_abs', groupType:'abs', groupLabel:'ABS — Biserie', groupRole:'B' },
+      { id:'m10_lun_1', name:'Dominada abierto', presc:'1×fallo', sets:1, rest:0, note:'Activación' },
+      { id:'m10_lun_2', name:'Remo en T agarre prono pecho apoyado', presc:'2×8-10', sets:2, rest:120 },
+      { id:'m10_lun_3', name:'Remo agarre neutro en máquina', presc:'2×8-10', sets:2, rest:120 },
+      { id:'m10_lun_4', name:'Curl bayesian', presc:'3×10-8', sets:3, rest:120 },
+      { id:'m10_lun_5', name:'Peck deck invertido', presc:'2×10-12', sets:2, rest:90 },
+      { id:'m10_lun_6', name:'Curl predicador unilateral (pesado)', presc:'2×8-10', sets:2, rest:120 },
+      { id:'m10_lun_7', name:'Martillos con mancuerna', presc:'2×10-12', sets:2, rest:120 },
+      { id:'m10_lun_abs_a', name:'Crunch en polea con cuerda (pesado)', presc:'3×12-10', sets:3, rest:null, group:'m10_lun_abs', groupType:'abs', groupLabel:'ABS — Biserie', groupRole:'A' },
+      { id:'m10_lun_abs_b', name:'Elevación de pies acostado', presc:'3×fallo', sets:3, rest:120, group:'m10_lun_abs', groupType:'abs', groupLabel:'ABS — Biserie', groupRole:'B' },
     ]
   },
   martes: {
     name: 'PIERNA',
     dayName: 'Martes',
     exercises: [
-      { id:'mar_1', name:'Aductor de cadera', presc:'3×10-12', sets:3, rest:120 },
-      { id:'mar_2', name:'Sentadilla hack', presc:'1×8-6', sets:1, rest:180 },
-      { id:'mar_3', name:'Sentadilla hack back off (−10% carga)', presc:'2×12-10', sets:2, rest:120, note:'−10% del peso anterior' },
-      { id:'mar_4', name:'Extensión de cuádriceps', presc:'3×12-10', sets:3, rest:120 },
-      { id:'mar_5', name:'Curl femoral sentado', presc:'3×10-8', sets:3, rest:120 },
-      { id:'mar_6', name:'Puentes con barra o máquina', presc:'2×8-10', sets:2, rest:120 },
-      { id:'mar_7', name:'Femoral acostado', presc:'2×8-10', sets:2, rest:120 },
-      { id:'mar_cal_1', name:'Elevación de talón', presc:'3×12', sets:3, rest:120, group:'mar_cal', groupType:'pantorrilla', groupLabel:'Pantorrilla', groupRole:'calf' },
+      { id:'m10_mar_1', name:'Aductor de cadera', presc:'2×10-12', sets:2, rest:120 },
+      { id:'m10_mar_2', name:'Sentadilla hack (control)', presc:'2×12-10', sets:2, rest:120 },
+      { id:'m10_mar_3', name:'Extensión de cuádriceps (pesadas)', presc:'3×12-10', sets:3, rest:120 },
+      { id:'m10_mar_4', name:'Curl femoral sentado', presc:'3×10-8', sets:3, rest:120 },
+      { id:'m10_mar_5', name:'Puentes con barra o máquina', presc:'3×8-10', sets:3, rest:120 },
+      { id:'m10_mar_6', name:'Femoral acostado', presc:'2×8-10', sets:2, rest:120 },
+      { id:'m10_mar_cal_1', name:'Elevación de talón', presc:'3×12', sets:3, rest:120, group:'m10_mar_cal', groupType:'pantorrilla', groupLabel:'Pantorrilla', groupRole:'calf' },
     ]
   },
   miercoles: {
     name: 'EMPUJE',
     dayName: 'Miércoles',
     exercises: [
-      { id:'mie_1', name:'Press inclinado con mancuernas', presc:'1×8 + 2×12-10 (back off)', sets:3, rest:120, note:'1 serie pesada + 2 series −10%' },
-      { id:'mie_2', name:'Peck deck', presc:'2×10-12', sets:2, rest:120 },
-      { id:'mie_3', name:'Vuelos laterales parado con mancuernas (pecho en banco inclinado)', presc:'3×10-12', sets:3, rest:90 },
-      { id:'mie_4', name:'Fondos libres enfoque pecho', presc:'2×fallo', sets:2, rest:120 },
-      { id:'mie_5', name:'Vuelos laterales en polea unilateral', presc:'2×8-10', sets:2, rest:120 },
-      { id:'mie_6', name:'Copa en polea media con cuerda', presc:'2×8-10', sets:2, rest:90 },
-      { id:'mie_7', name:'Extensión 1 mano', presc:'3×12-10', sets:3, rest:90 },
-      { id:'mie_abs_a', name:'Crunch en poleas', presc:'3×15', sets:3, rest:null, group:'mie_abs', groupType:'abs', groupLabel:'ABS — Biserie', groupRole:'A' },
-      { id:'mie_abs_b', name:'Plancha', presc:'3×60 seg', sets:3, rest:120, group:'mie_abs', groupType:'abs', groupLabel:'ABS — Biserie', groupRole:'B' },
+      { id:'m10_mie_1', name:'Press inclinado con mancuernas', presc:'1×8 + 1×12-10 (back off)', sets:2, rest:120 },
+      { id:'m10_mie_2', name:'Peck deck', presc:'2×10-12', sets:2, rest:120 },
+      { id:'m10_mie_3', name:'Vuelos laterales parado con mancuernas (pecho en banco inclinado)', presc:'3×10-12', sets:3, rest:90 },
+      { id:'m10_mie_4', name:'Fondos libres enfoque pecho', presc:'2×fallo', sets:2, rest:120 },
+      { id:'m10_mie_5', name:'Vuelos laterales en polea unilateral', presc:'3×8-10', sets:3, rest:120 },
+      { id:'m10_mie_6', name:'Copa en polea media con cuerda', presc:'2×8-10', sets:2, rest:90 },
+      { id:'m10_mie_7', name:'Extensión 1 mano', presc:'3×12-10', sets:3, rest:90 },
+      { id:'m10_mie_abs_a', name:'Crunch en poleas', presc:'3×15', sets:3, rest:120, group:'m10_mie_abs', groupType:'abs', groupLabel:'ABS — Biserie', groupRole:'A' },
+      { id:'m10_mie_abs_b', name:'Plancha', presc:'3×60 seg', sets:3, rest:120, unit:'seg', group:'m10_mie_abs', groupType:'abs', groupLabel:'ABS — Biserie', groupRole:'B' },
     ]
   },
   jueves: {
     name: 'JALÓN',
     dayName: 'Jueves',
     exercises: [
-      { id:'jue_1', name:'Dominada abierto agarre neutro', presc:'1×fallo', sets:1, rest:0, note:'Activación' },
-      { id:'jue_2', name:'Jalón al pecho abierto agarre prono', presc:'2×10-8', sets:2, rest:120 },
-      { id:'jue_3', name:'Remo cerrado unilateral', presc:'2×8-10', sets:2, rest:120 },
-      { id:'jue_4', name:'Remo en polea abierto prono', presc:'2×8-10', sets:2, rest:120 },
-      { id:'jue_5', name:'Posterior en peck deck invertido', presc:'2×10-12', sets:2, rest:120 },
-      { id:'jue_6', name:'Predicador a 1 mano', presc:'2×10-12', sets:2, rest:120 },
-      { id:'jue_7', name:'Curl con barra recta en polea', presc:'2×8', sets:2, rest:120 },
-      { id:'jue_cal_1', name:'Elevación de talón', presc:'3×10-12', sets:3, rest:100, group:'jue_cal', groupType:'pantorrilla', groupLabel:'Pantorrilla', groupRole:'calf' },
+      { id:'m10_jue_1', name:'Dominada abierto agarre neutro', presc:'1×fallo', sets:1, rest:0, note:'Activación' },
+      { id:'m10_jue_2', name:'Remo en T agarre prono pecho apoyado', presc:'3×8-10', sets:3, rest:120 },
+      { id:'m10_jue_3', name:'Curl con barra recta en polea', presc:'3×8', sets:3, rest:120 },
+      { id:'m10_jue_4', name:'Remo cerrado unilateral', presc:'2×8-10', sets:2, rest:120 },
+      { id:'m10_jue_5', name:'Predicador a 1 mano', presc:'2×10-12', sets:2, rest:120 },
+      { id:'m10_jue_6', name:'Martillos con mancuerna', presc:'2×10-8', sets:2, rest:120 },
+      { id:'m10_jue_cal_1', name:'Elevación de talón', presc:'3×10-12', sets:3, rest:100, group:'m10_jue_cal', groupType:'pantorrilla', groupLabel:'Pantorrilla', groupRole:'calf' },
     ]
   },
   viernes: {
     name: 'PIERNA',
     dayName: 'Viernes',
     exercises: [
-      { id:'vie_1', name:'Femoral acostado unilateral', presc:'2×12-10-8', sets:2, rest:120 },
-      { id:'vie_2', name:'Peso muerto rumano', presc:'2×10-12', sets:2, rest:150 },
-      { id:'vie_3', name:'Prensa a 2 piernas', presc:'2×8-10', sets:2, rest:120 },
-      { id:'vie_4', name:'Femoral sentado', presc:'3×10-8', sets:3, rest:120 },
-      { id:'vie_5', name:'Extensión de cuads', presc:'2×12 máxima intensidad', sets:2, rest:120 },
-      { id:'vie_6', name:'Hiperextensión glúteo', presc:'2×12-10', sets:2, rest:120 },
-      { id:'vie_abs_a', name:'Crunch en polea con cuerda', presc:'3×12-10', sets:3, rest:null, group:'vie_abs', groupType:'abs', groupLabel:'ABS — Biserie', groupRole:'A' },
-      { id:'vie_abs_b', name:'Elevación de pies acostado', presc:'3×fallo', sets:3, rest:120, group:'vie_abs', groupType:'abs', groupLabel:'ABS — Biserie', groupRole:'B' },
+      { id:'m10_vie_1', name:'Femoral acostado (unilateral)', presc:'2×12-10-8', sets:2, rest:120 },
+      { id:'m10_vie_2', name:'Peso muerto rumano', presc:'2×10-12', sets:2, rest:150 },
+      { id:'m10_vie_3', name:'Puentes con barra o máquina', presc:'2×8-10', sets:2, rest:120 },
+      { id:'m10_vie_4', name:'Prensa a 2 piernas', presc:'2×8-10', sets:2, rest:120 },
+      { id:'m10_vie_5', name:'Femoral sentado', presc:'2×10-8', sets:2, rest:120 },
+      { id:'m10_vie_6', name:'Extensión de cuads (máxima intensidad)', presc:'2×12', sets:2, rest:120 },
+      { id:'m10_vie_abs_a', name:'Crunch en polea con cuerda (pesado)', presc:'3×12-10', sets:3, rest:null, group:'m10_vie_abs', groupType:'abs', groupLabel:'ABS — Biserie', groupRole:'A' },
+      { id:'m10_vie_abs_b', name:'Elevación de pies acostado', presc:'3×fallo', sets:3, rest:120, group:'m10_vie_abs', groupType:'abs', groupLabel:'ABS — Biserie', groupRole:'B' },
     ]
   },
   sabado: {
     name: 'EMPUJE',
     dayName: 'Sábado',
     exercises: [
-      { id:'sab_1', name:'Press de hombro con mancuernas', presc:'2×8-10', sets:2, rest:120 },
-      { id:'sab_2', name:'Press plano con mancuerna', presc:'2×10-8', sets:2, rest:120 },
-      { id:'sab_3', name:'Vuelo en polea baja', presc:'3×10-8', sets:3, rest:120 },
-      { id:'sab_4', name:'Fondos libres enfoque pecho', presc:'1×fallo', sets:1, rest:120 },
-      { id:'sab_5', name:'Vuelos laterales con mancuerna', presc:'2×10-8', sets:2, rest:60 },
-      { id:'sab_6', name:'Rompe cráneos en banco inclinado', presc:'2×10-12 + 2×8-10', sets:4, rest:120, note:'4 series totales' },
-      { id:'sab_cal_1', name:'Elevación de talón', presc:'3×10-12', sets:3, rest:90, group:'sab_cal', groupType:'pantorrilla', groupLabel:'Pantorrilla', groupRole:'calf' },
+      { id:'m10_sab_1', name:'Press de hombro con mancuernas', presc:'2×8-10', sets:2, rest:120 },
+      { id:'m10_sab_2', name:'Vuelo en polea baja', presc:'3×10-8', sets:3, rest:120 },
+      { id:'m10_sab_3', name:'Peck deck', presc:'2×10-12', sets:2, rest:120 },
+      { id:'m10_sab_4', name:'Vuelos laterales con mancuerna', presc:'3×10-8', sets:3, rest:60 },
+      { id:'m10_sab_5', name:'Rompe cráneos en banco inclinado', presc:'2×10-12', sets:2, rest:120 },
+      { id:'m10_sab_6', name:'Extensión a 1 mano', presc:'2×8-10', sets:2, rest:210 },
+      { id:'m10_sab_cal_1', name:'Elevación de talón', presc:'3×10-12', sets:3, rest:90, group:'m10_sab_cal', groupType:'pantorrilla', groupLabel:'Pantorrilla', groupRole:'calf' },
     ]
   }
 };
@@ -505,10 +533,27 @@ function saveLogs(logs) { localStorage.setItem('workout_logs', JSON.stringify(lo
 function initState() {
   let s = getState();
   if (!s.mesocycle) s.mesocycle = 9;
-  if (!s.week) s.week = 1;
   if (!s.startDate) s.startDate = new Date().toISOString().slice(0,10);
   setState(s);
   return s;
+}
+
+// Semana calculada a partir de la fecha de inicio (bloques de 7 días exactos).
+// Ya no se guarda/edita a mano — la fecha de inicio es el único mecanismo de ajuste.
+function computeCurrentWeek(s) {
+  if (!s.startDate) return 1;
+  const start = new Date(s.startDate + 'T00:00:00');
+  const now = new Date(); now.setHours(0,0,0,0);
+  const daysSince = Math.floor((now - start) / 86400000);
+  if (daysSince < 0) return 1;
+  return Math.min(Math.floor(daysSince / 7) + 1, 8);
+}
+function isMesocycleOverdue(s) {
+  if (!s.startDate) return false;
+  const start = new Date(s.startDate + 'T00:00:00');
+  const now = new Date(); now.setHours(0,0,0,0);
+  const daysSince = Math.floor((now - start) / 86400000);
+  return Math.floor(daysSince / 7) + 1 > 8;
 }
 
 // ══════════════════════════════════════════════
@@ -539,6 +584,9 @@ function exById(id) {
     const ex = day.exercises.find(e => e.id === id);
     if (ex) return ex;
   }
+  if (ARCHIVED_EXERCISE_NAMES[id]) {
+    return { id, name: ARCHIVED_EXERCISE_NAMES[id], presc: '—', sets: 0, rest: null, archived: true };
+  }
   return null;
 }
 
@@ -547,6 +595,42 @@ function getExLogs(exId) {
   return getLogs()
     .filter(l => l.exId === exId)
     .sort((a,b) => a.date.localeCompare(b.date));
+}
+
+// ══════════════════════════════════════════════
+// GOOGLE SHEETS SYNC (respaldo, una sola vía app → Sheet)
+// ══════════════════════════════════════════════
+const SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwBRJ5oVMPHlM45GgpPkdn7NPny2MYiwDbCTAFOHseE_9BnayrRANRb-2vUdReqJw9_KQ/exec';
+
+function pushToSheet(exId, entry, setObj) {
+  if (!SHEET_WEBHOOK_URL) return;
+  const ex = exById(exId);
+  const payload = {
+    date: entry.date, mesocycle: entry.mesocycle, week: entry.week, day: entry.day,
+    exId, exName: ex ? ex.name : exId, setN: setObj.n, weight: setObj.weight, reps: setObj.reps
+  };
+  fetch(SHEET_WEBHOOK_URL, {
+    method: 'POST', mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(payload)
+  }).catch(() => {});
+}
+
+function resyncAllToSheet() {
+  if (!SHEET_WEBHOOK_URL) {
+    alert('Todavía no has configurado la URL del Google Sheet (SHEET_WEBHOOK_URL).');
+    return;
+  }
+  const logs = getLogs();
+  let count = 0;
+  logs.forEach(entry => {
+    if (!entry.sets || !entry.sets.length) return;
+    entry.sets.forEach(setObj => {
+      pushToSheet(entry.exId, entry, setObj);
+      count++;
+    });
+  });
+  alert(`Reenviando ${count} series a la Google Sheet...`);
 }
 
 // ══════════════════════════════════════════════
@@ -568,12 +652,13 @@ function exportProgressToExcel() {
   logs.forEach(entry => {
     if (!entry.sets || !entry.sets.length) return;
     const ex = exById(entry.exId);
+    const day = entry.day || DAY_MAP[new Date(entry.date + 'T00:00:00').getDay()] || '';
     entry.sets.forEach(s => {
       rows.push([
         entry.date,
         entry.mesocycle ?? '',
         entry.week ?? '',
-        entry.day ?? '',
+        day,
         ex ? ex.name : entry.exId,
         s.n,
         s.weight > 0 ? s.weight : 'PC',
@@ -606,7 +691,8 @@ function getLastSessionSets(exId) {
 function getTodayLog(exId) {
   const today = new Date().toISOString().slice(0,10);
   const s = getState();
-  return getLogs().find(l => l.exId === exId && l.date === today && l.mesocycle === s.mesocycle && l.week === s.week) || null;
+  const week = computeCurrentWeek(s);
+  return getLogs().find(l => l.exId === exId && l.date === today && l.mesocycle === s.mesocycle && l.week === week) || null;
 }
 
 function getTodayLogSets(exId) {
@@ -617,21 +703,25 @@ function getTodayLogSets(exId) {
 function saveSet(exId, weight, reps) {
   const today = new Date().toISOString().slice(0,10);
   const s = getState();
+  const week = computeCurrentWeek(s);
   let logs = getLogs();
-  let entry = logs.find(l => l.exId === exId && l.date === today && l.mesocycle === s.mesocycle && l.week === s.week);
+  let entry = logs.find(l => l.exId === exId && l.date === today && l.mesocycle === s.mesocycle && l.week === week);
   if (!entry) {
-    entry = { id: Date.now()+'_'+Math.random().toString(36).slice(2), exId, date: today, mesocycle: s.mesocycle, week: s.week, sets: [] };
+    entry = { id: Date.now()+'_'+Math.random().toString(36).slice(2), exId, date: today, mesocycle: s.mesocycle, week: week, day: appState.currentDay || todayKey(), sets: [] };
     logs.push(entry);
   }
-  entry.sets.push({ n: entry.sets.length + 1, weight: parseFloat(weight) || 0, reps: parseInt(reps) || 0 });
+  const setObj = { n: entry.sets.length + 1, weight: parseFloat(weight) || 0, reps: parseInt(reps) || 0 };
+  entry.sets.push(setObj);
   saveLogs(logs);
+  pushToSheet(exId, entry, setObj);
 }
 
 function deleteSet(exId, setIndex) {
   const today = new Date().toISOString().slice(0,10);
   const s = getState();
+  const week = computeCurrentWeek(s);
   let logs = getLogs();
-  const entry = logs.find(l => l.exId === exId && l.date === today && l.mesocycle === s.mesocycle && l.week === s.week);
+  const entry = logs.find(l => l.exId === exId && l.date === today && l.mesocycle === s.mesocycle && l.week === week);
   if (!entry) return;
   entry.sets.splice(setIndex, 1);
   entry.sets.forEach((s,i) => s.n = i+1);
@@ -735,16 +825,22 @@ function goLog() { showScreen('log'); renderLog(appState.currentExId); }
 function renderHome() {
   const s = initState();
   const dayKey = todayKey();
+  const week = computeCurrentWeek(s);
 
   document.getElementById('home-meso-badge').textContent = `Mesociclo ${s.mesocycle}`;
-  document.getElementById('home-week-badge').textContent = `Semana ${s.week} / 8`;
+  document.getElementById('home-week-badge').textContent = `Semana ${week} / 8`;
+
+  const banner = document.getElementById('meso-overdue-banner');
+  banner.innerHTML = isMesocycleOverdue(s)
+    ? `<div class="overdue-banner">Mesociclo completado — archívalo desde Ajustes para empezar el siguiente.</div>`
+    : '';
 
   // Week grid
   const grid = document.getElementById('week-grid');
   grid.innerHTML = '';
   for (let w = 1; w <= 8; w++) {
     const dot = document.createElement('div');
-    dot.className = 'week-dot' + (w < s.week ? ' done' : '') + (w === s.week ? ' active' : '');
+    dot.className = 'week-dot' + (w < week ? ' done' : '') + (w === week ? ' active' : '');
     dot.textContent = w;
     dot.title = `Semana ${w}`;
     grid.appendChild(dot);
@@ -933,12 +1029,13 @@ function renderLog(exId) {
   html += `</div></div>`;
 
   // Logged sets today
+  const repsUnit = ex.unit === 'seg' ? 'seg' : 'reps';
   html += `<div class="sets-area" id="sets-area">`;
   if (todaySets.length) {
     todaySets.forEach((s, i) => {
       html += `<div class="set-row">
         <div class="set-badge">Serie ${s.n}</div>
-        <div class="set-info">${s.weight > 0 ? s.weight + ' kg' : 'Peso corporal'} × ${s.reps} reps</div>
+        <div class="set-info">${s.weight > 0 ? s.weight + ' kg' : 'Peso corporal'} × ${s.reps} ${repsUnit}</div>
         <button class="set-del" onclick="delSet('${exId}', ${i})">✕</button>
       </div>`;
     });
@@ -958,7 +1055,7 @@ function renderLog(exId) {
         <input type="number" id="inp-weight" min="0" step="0.5" placeholder="0" inputmode="decimal" value="${lastRefSets[nextSetNum-2]?.weight || lastRefSets[lastRefSets.length-1]?.weight || ''}">
       </div>
       <div class="input-grp">
-        <label>Reps</label>
+        <label>${ex.unit === 'seg' ? 'Segundos' : 'Reps'}</label>
         <input type="number" id="inp-reps" min="0" step="1" placeholder="0" inputmode="numeric" value="">
       </div>
     </div>
@@ -1033,9 +1130,10 @@ function renderProgress(exId) {
   if (!logs.length) {
     html += `<div class="empty-prog"><div class="eicon">📊</div>No hay datos registrados aún.</div>`;
   } else {
+    const repsUnit = ex.unit === 'seg' ? 'Seg' : 'Reps';
     html += `<div class="table-wrap"><table>
       <thead><tr>
-        <th>Fecha</th><th>Sem.</th><th>Serie</th><th>Peso</th><th>Reps</th>
+        <th>Fecha</th><th>Sem.</th><th>Serie</th><th>Peso</th><th>${repsUnit}</th>
       </tr></thead>
       <tbody>`;
     logs.forEach(entry => {
@@ -1062,7 +1160,8 @@ function renderProgress(exId) {
 function openSettings() {
   const s = getState();
   document.getElementById('settings-meso-num').value = s.mesocycle || 9;
-  document.getElementById('settings-week-num').value = s.week || 1;
+  document.getElementById('settings-start-date').value = s.startDate || new Date().toISOString().slice(0,10);
+  document.getElementById('settings-week-computed').textContent = `Semana calculada: ${computeCurrentWeek(s)} / 8`;
   document.getElementById('settings-modal').classList.add('active');
 }
 
@@ -1077,9 +1176,9 @@ function closeSettingsOutside(e) {
 function saveSettings() {
   const s = getState();
   const mNum = parseInt(document.getElementById('settings-meso-num').value);
-  const wNum = parseInt(document.getElementById('settings-week-num').value);
+  const startDate = document.getElementById('settings-start-date').value;
   if (mNum > 0) s.mesocycle = mNum;
-  if (wNum >= 1 && wNum <= 8) s.week = wNum;
+  if (startDate) s.startDate = startDate;
   setState(s);
   closeSettings();
   renderHome();
@@ -1092,9 +1191,8 @@ function archiveMesocycle() {
   let archives = JSON.parse(localStorage.getItem('meso_archives') || '[]');
   archives.push({ mesocycle: s.mesocycle, archivedAt: new Date().toISOString() });
   localStorage.setItem('meso_archives', JSON.stringify(archives));
-  // Bump mesocycle, reset week
+  // Bump mesocycle, reset start date
   s.mesocycle = (s.mesocycle || 9) + 1;
-  s.week = 1;
   s.startDate = new Date().toISOString().slice(0,10);
   setState(s);
   closeSettings();
