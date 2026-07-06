@@ -378,6 +378,12 @@
       <button class="btn btn-danger" onclick="archiveMesocycle()">Archivar mesociclo y empezar siguiente</button>
     </div>
 
+    <div class="modal-section">
+      <h4>Exportar datos</h4>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px;">Descarga todo el historial de pesos y progresión en un archivo Excel (.csv).</p>
+      <button class="btn btn-secondary" onclick="exportProgressToExcel()">Exportar a Excel</button>
+    </div>
+
     <div style="display:flex;gap:10px;margin-top:8px;">
       <button class="btn btn-accent" onclick="saveSettings()">Guardar</button>
       <button class="btn btn-secondary" onclick="closeSettings()">Cancelar</button>
@@ -541,6 +547,51 @@ function getExLogs(exId) {
   return getLogs()
     .filter(l => l.exId === exId)
     .sort((a,b) => a.date.localeCompare(b.date));
+}
+
+// ══════════════════════════════════════════════
+// EXPORT — Excel (CSV)
+// ══════════════════════════════════════════════
+function csvEscape(val) {
+  const s = String(val ?? '');
+  return /[";\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function exportProgressToExcel() {
+  const logs = getLogs().slice().sort((a,b) => a.date.localeCompare(b.date));
+  if (!logs.length) {
+    alert('No hay datos registrados todavía.');
+    return;
+  }
+
+  const rows = [['Fecha', 'Mesociclo', 'Semana', 'Día', 'Ejercicio', 'Serie', 'Peso (kg)', 'Reps']];
+  logs.forEach(entry => {
+    if (!entry.sets || !entry.sets.length) return;
+    const ex = exById(entry.exId);
+    entry.sets.forEach(s => {
+      rows.push([
+        entry.date,
+        entry.mesocycle ?? '',
+        entry.week ?? '',
+        entry.day ?? '',
+        ex ? ex.name : entry.exId,
+        s.n,
+        s.weight > 0 ? s.weight : 'PC',
+        s.reps
+      ]);
+    });
+  });
+
+  const csv = '﻿' + rows.map(r => r.map(csvEscape).join(';')).join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `progresion_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 // Get last session logs for an exercise (previous date)
