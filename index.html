@@ -164,6 +164,18 @@
     .grp-label.A { background: rgba(124,58,237,.3); color: #c4b5fd; }
     .grp-label.B { background: rgba(37,99,235,.3); color: #93c5fd; }
     .grp-label.calf { background: rgba(8,145,178,.3); color: #67e8f9; }
+    .equip-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .equip-chip {
+      border: 1px solid var(--border); background: var(--surface2); color: var(--text-dim);
+      border-radius: 20px; padding: 7px 12px; font-size: 13px; font-weight: 600;
+      font-family: inherit; cursor: pointer;
+    }
+    .equip-chip.active { background: rgba(99,102,241,.2); border-color: var(--primary); color: #c7d2fe; }
+    .equip-chip.add { border-style: dashed; }
+    .other-ref { margin-top: 8px; font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+    .legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; font-size: 12px; color: var(--text-dim); }
+    .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+    .equip-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
     .grp-label.abs { background: rgba(124,58,237,.3); color: #c4b5fd; }
 
     /* comparación vs sesión anterior */
@@ -405,6 +417,12 @@
         <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">Restaurar</button>
       </div>
       <input type="file" id="import-file" accept="application/json,.json" style="display:none" onchange="importBackupJSON(this)">
+    </div>
+
+    <div class="modal-section">
+      <h4>Máquinas</h4>
+      <p class="desc">Se crean desde cada ejercicio con "+ Otra". Aquí puedes renombrarlas; el historial se actualiza solo.</p>
+      <div id="settings-equip"></div>
     </div>
 
     <div class="modal-section">
@@ -741,7 +759,7 @@ function isMesocycleOverdue(s) {
 // ══════════════════════════════════════════════
 // APP STATE
 // ══════════════════════════════════════════════
-let appState = { currentDay: null, currentExId: null };
+let appState = { currentDay: null, currentExId: null, pendingEquip: {} };
 
 // ══════════════════════════════════════════════
 // HELPERS
@@ -822,11 +840,88 @@ function getExLogs(exId) {
     .sort((a,b) => a.date.localeCompare(b.date));
 }
 
-// Última sesión ANTERIOR a hoy.
-function getPrevEntry(exId) {
+// Última sesión ANTERIOR a hoy en la misma máquina (equip null = sin especificar).
+function getPrevEntry(exId, equip) {
+  const today = localISO();
+  const prev = getExLogs(exId).filter(l => l.date < today && sameEquip(l.equip, equip));
+  return prev.length ? prev[prev.length - 1] : null;
+}
+// Última sesión anterior en cualquier máquina (solo como referencia visual).
+function getPrevEntryAny(exId) {
   const today = localISO();
   const prev = getExLogs(exId).filter(l => l.date < today);
   return prev.length ? prev[prev.length - 1] : null;
+}
+
+// ══════════════════════════════════════════════
+// MÁQUINAS
+// ══════════════════════════════════════════════
+// Las poleas/máquinas no son comparables entre sí (relación de poleas, numeración de
+// la pila, perfil de resistencia). Cada sesión de un ejercicio puede llevar la máquina
+// usada; las comparaciones solo se hacen dentro de la misma máquina.
+function getEquipMap() { return readJSON('equipment', {}); }
+function saveEquipMap(m) { localStorage.setItem('equipment', JSON.stringify(m)); }
+function equipName(id) { return id ? (getEquipMap()[id] || id) : null; }
+function sameEquip(a, b) { return (a || null) === (b || null); }
+function escapeHtml(t) { return String(t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+
+// Máquinas usadas antes en este ejercicio (incluye mesociclos anteriores), la más reciente primero.
+function equipsForEx(exId) {
+  const seen = [];
+  getExLogs(exId).slice().reverse().forEach(l => { if (l.equip && !seen.includes(l.equip)) seen.push(l.equip); });
+  return seen;
+}
+// Máquina activa: la de hoy si ya hay series; si no, la elegida; si no, la de la última sesión.
+function currentEquip(exId) {
+  const e = findTodayEntry(getLogs(), exId);
+  if (e) return e.equip || null;
+  if (exId in appState.pendingEquip) return appState.pendingEquip[exId];
+  const last = getPrevEntryAny(exId);
+  return last ? (last.equip || null) : null;
+}
+function setEquip(exId, id) {
+  const logs = getLogs();
+  const e = findTodayEntry(logs, exId);
+  if (e) {
+    if (id) e.equip = id; else delete e.equip;
+    saveLogs(logs);
+    if (e.sets.length) queueUpsert(e.sets.map(x => x.uid));
+  } else {
+    appState.pendingEquip[exId] = id || null;
+  }
+  renderLog(exId);
+}
+function addEquip(exId) {
+  const m = getEquipMap();
+  const existing = Object.values(m);
+  const name = (prompt('Nombre de la máquina (p. ej. "Polea 2")' + (existing.length ? '\nYa creadas: ' + existing.join(', ') : '')) || '').trim();
+  if (!name) return;
+  let id = Object.keys(m).find(k => m[k].toLowerCase() === name.toLowerCase());
+  if (!id) { id = 'eq_' + newUid(); m[id] = name; saveEquipMap(m); }
+  setEquip(exId, id);
+}
+function renameEquip(id) {
+  const m = getEquipMap();
+  const name = (prompt('Nuevo nombre de la máquina', m[id] || '') || '').trim();
+  if (!name || name === m[id]) return;
+  if (Object.keys(m).some(k => k !== id && m[k].toLowerCase() === name.toLowerCase())) { alert('Ya existe una máquina con ese nombre.'); return; }
+  m[id] = name; saveEquipMap(m);
+  // La Sheet guarda el nombre: reenviar las series de esa máquina.
+  const uids = [];
+  getLogs().forEach(l => { if (l.equip === id) l.sets.forEach(x => uids.push(x.uid)); });
+  if (uids.length) queueUpsert(uids);
+  renderEquipSettings();
+}
+function renderEquipSettings() {
+  const el = document.getElementById('settings-equip');
+  if (!el) return;
+  const m = getEquipMap();
+  const counts = {};
+  getLogs().forEach(l => { if (l.equip) counts[l.equip] = (counts[l.equip] || 0) + 1; });
+  const ids = Object.keys(m).sort((a, b) => m[a].localeCompare(m[b]));
+  el.innerHTML = ids.length
+    ? ids.map(id => `<div class="equip-row"><span>${escapeHtml(m[id])} <span style="color:var(--text-muted);font-size:12px;">· ${counts[id] || 0} sesiones</span></span><button class="btn-outline" onclick="renameEquip('${id}')">Renombrar</button></div>`).join('')
+    : `<p class="desc" style="margin:0;">Aún no has creado ninguna.</p>`;
 }
 
 function findTodayEntry(logs, exId) {
@@ -944,7 +1039,7 @@ function setPayload(entry, s) {
     exId: entry.exId, exName: ex ? ex.name : entry.exId,
     setN: s.n, weight: s.weight, reps: s.reps
   };
-  if (SHEET_PROTOCOL >= 2) { base.uid = s.uid; base.unit = unitOf(ex); }
+  if (SHEET_PROTOCOL >= 2) { base.uid = s.uid; base.unit = unitOf(ex); base.equip = equipName(entry.equip) || ''; }
   return base;
 }
 
@@ -1051,7 +1146,7 @@ function exportProgressToExcel() {
   const logs = getLogs().slice().sort((a,b) => a.date.localeCompare(b.date));
   if (!logs.some(l => l.sets && l.sets.length)) { alert('No hay datos registrados todavía.'); return; }
 
-  const rows = [['Fecha', 'Mesociclo', 'Semana', 'Día', 'Ejercicio', 'Serie', 'Peso (kg)', 'Reps/Seg', 'Unidad', '1RM est. (kg)']];
+  const rows = [['Fecha', 'Mesociclo', 'Semana', 'Día', 'Ejercicio', 'Máquina', 'Serie', 'Peso (kg)', 'Reps/Seg', 'Unidad', '1RM est. (kg)']];
   logs.forEach(entry => {
     if (!entry.sets || !entry.sets.length) return;
     const ex = exById(entry.exId);
@@ -1059,7 +1154,7 @@ function exportProgressToExcel() {
     entry.sets.forEach(s => {
       rows.push([
         entry.date, entry.mesocycle ?? '', entry.week ?? '', day,
-        ex ? ex.name : entry.exId, s.n,
+        ex ? ex.name : entry.exId, equipName(entry.equip) || '', s.n,
         s.weight > 0 ? String(s.weight).replace('.', ',') : 'PC',
         s.reps, unitOf(ex),
         s.weight > 0 ? setScore(s).toFixed(1).replace('.', ',') : ''
@@ -1073,7 +1168,7 @@ function exportProgressToExcel() {
 function exportBackupJSON() {
   const data = {
     app: 'entrenamiento', version: 2, exportedAt: new Date().toISOString(),
-    meso_state: getState(), workout_logs: getLogs(), meso_archives: getArchives()
+    meso_state: getState(), workout_logs: getLogs(), meso_archives: getArchives(), equipment: getEquipMap()
   };
   downloadFile(`respaldo_entreno_${localISO()}.json`, JSON.stringify(data), 'application/json');
   localStorage.setItem('last_backup', new Date().toISOString());
@@ -1096,6 +1191,7 @@ function importBackupJSON(input) {
     saveLogs(data.workout_logs);
     if (data.meso_state && typeof data.meso_state === 'object') setState(data.meso_state);
     localStorage.setItem('meso_archives', JSON.stringify(Array.isArray(data.meso_archives) ? data.meso_archives : []));
+    saveEquipMap(data.equipment && typeof data.equipment === 'object' ? data.equipment : {});
     migrateData();
     resolveProgram();
     closeSettings();
@@ -1114,6 +1210,8 @@ function saveSet(exId, weight, reps) {
   if (!entry) {
     const s = getState();
     entry = { id: newUid(), exId, date: localISO(), mesocycle: s.mesocycle, week: computeCurrentWeek(s), day: appState.currentDay || todayKey(), sets: [] };
+    const eq = currentEquip(exId);
+    if (eq) entry.equip = eq;
     logs.push(entry);
   }
   const setObj = { uid: newUid(), n: entry.sets.length + 1, weight: parseFloat(weight) || 0, reps: parseInt(reps, 10) || 0 };
@@ -1343,9 +1441,11 @@ function startSession(dayKey) {
 function loggedInfo(ex) {
   const sets = getTodayLogSets(ex.id);
   if (!sets.length) return '';
-  const prev = getPrevEntry(ex.id);
+  const entry = findTodayEntry(getLogs(), ex.id);
+  const prev = getPrevEntry(ex.id, entry && entry.equip);
   const c = prev ? cmpSessions(sets, prev.sets, ex) : null;
-  return `<div class="ex-logged-info">✓ ${sets.length} serie${sets.length>1?'s':''} registrada${sets.length>1?'s':''}${c !== null ? ` · vs última ${cmpTag(c)}` : ''}</div>`;
+  const eqName = entry && entry.equip ? ` · ${escapeHtml(equipName(entry.equip))}` : '';
+  return `<div class="ex-logged-info">✓ ${sets.length} serie${sets.length>1?'s':''} registrada${sets.length>1?'s':''}${eqName}${c !== null ? ` · vs última ${cmpTag(c)}` : ''}</div>`;
 }
 
 function renderSession(dayKey) {
@@ -1421,8 +1521,10 @@ function renderLog(exId) {
 
   const body = document.getElementById('log-body');
   const todaySets = getTodayLogSets(exId);
-  const lastEntry = getPrevEntry(exId);
+  const curEquip = currentEquip(exId);
+  const lastEntry = getPrevEntry(exId, curEquip);
   const lastRefSets = lastEntry ? lastEntry.sets : [];
+  const otherEntry = lastEntry ? null : getPrevEntryAny(exId);
   const unit = unitOf(ex);
 
   let restLabel;
@@ -1440,6 +1542,18 @@ function renderLog(exId) {
     ${ex.note ? `<div class="sub" style="margin-top:4px;color:var(--warn);">💡 ${ex.note}</div>` : ''}
   </div>`;
 
+  // Selector de máquina
+  const eqIds = equipsForEx(exId);
+  if (curEquip && !eqIds.includes(curEquip)) eqIds.unshift(curEquip);
+  html += `<div class="info-box">
+    <div class="lbl">Máquina</div>
+    <div class="equip-chips">
+      <button class="equip-chip${curEquip ? '' : ' active'}" onclick="setEquip('${exId}', null)">Sin especificar</button>
+      ${eqIds.map(id => `<button class="equip-chip${id === curEquip ? ' active' : ''}" onclick="setEquip('${exId}', '${id}')">${escapeHtml(equipName(id))}</button>`).join('')}
+      <button class="equip-chip add" onclick="addEquip('${exId}')">+ Otra</button>
+    </div>
+  </div>`;
+
   // Doble progresión: solo con rangos ascendentes claros (p.ej. 8-10).
   const rr = repRange(ex);
   if (rr && lastRefSets.length >= ex.sets && lastRefSets.slice(0, ex.sets).every(s => s.reps >= rr.hi)) {
@@ -1447,16 +1561,20 @@ function renderLog(exId) {
   }
 
   html += `<div class="last-ref">
-    <div class="lbl">Última sesión${lastEntry ? ` · ${fmtDate(lastEntry.date)} (M${lastEntry.mesocycle ?? '?'}·S${lastEntry.week ?? '?'})` : ''}</div>
+    <div class="lbl">Última sesión${curEquip ? ' en esta máquina' : ''}${lastEntry ? ` · ${fmtDate(lastEntry.date)} (M${lastEntry.mesocycle ?? '?'}·S${lastEntry.week ?? '?'})` : ''}</div>
     <div class="ref-chips">`;
   if (lastRefSets.length) {
     lastRefSets.forEach(s => {
       html += `<div class="ref-chip">S${s.n}: ${s.weight > 0 ? s.weight + 'kg' : 'PC'} × ${s.reps}${unit === 'seg' ? 's' : ''}</div>`;
     });
   } else {
-    html += `<span class="ref-empty">Sin datos previos</span>`;
+    html += `<span class="ref-empty">${curEquip ? 'Sin datos previos en esta máquina' : 'Sin datos previos'}</span>`;
   }
-  html += `</div></div>`;
+  html += `</div>`;
+  if (otherEntry) {
+    html += `<div class="other-ref">En ${otherEntry.equip ? escapeHtml(equipName(otherEntry.equip)) : 'otra máquina / sin especificar'} (${fmtDate(otherEntry.date)}): ${otherEntry.sets.map(x => fmtSet(x, ex)).join(' · ')}<br>No se compara: la carga no es equivalente entre máquinas.</div>`;
+  }
+  html += `</div>`;
 
   html += `<div class="sets-area">`;
   if (todaySets.length) {
@@ -1480,7 +1598,7 @@ function renderLog(exId) {
   const formTitle = nextSetNum <= ex.sets ? `➕ Serie ${nextSetNum} de ${ex.sets}` : `➕ Serie ${nextSetNum} (extra)`;
 
   html += `<div class="log-form">
-    <div class="form-title">${formTitle}${ref ? ` · a batir: ${fmtSet(ref, ex)}` : ''}</div>
+    <div class="form-title">${formTitle}${curEquip ? ` · en ${escapeHtml(equipName(curEquip))}` : ''}${ref ? ` · a batir: ${fmtSet(ref, ex)}` : ''}</div>
     <div class="input-row">
       <div class="input-grp">
         <label>Peso (kg)</label>
@@ -1539,14 +1657,17 @@ function viewProgress() {
   renderProgress(appState.currentExId);
 }
 
-function lineChart(pts, decimals) {
-  if (pts.length < 2) return `<div class="ref-empty" style="padding:6px 0">Necesitas al menos 2 sesiones para ver la tendencia.</div>`;
+const SERIES_COLORS = ['#818cf8', '#34d399', '#f472b6', '#38bdf8', '#a3e635', '#e879f9'];
+// series: [{ name, color, pts: [{ xi, y, newMeso }] }], labels: etiqueta por posición x
+function lineChart(series, labels, decimals) {
+  const all = series.flatMap(s => s.pts);
+  if (labels.length < 2 || all.length < 2) return `<div class="ref-empty" style="padding:6px 0">Necesitas al menos 2 sesiones para ver la tendencia.</div>`;
   const W = 340, H = 160, pl = 38, pr = 12, pt = 12, pb = 24;
-  const ys = pts.map(p => p.y);
+  const ys = all.map(p => p.y);
   let min = Math.min(...ys), max = Math.max(...ys);
   if (max === min) { max += 1; min -= 1; }
   const pad = (max - min) * 0.12; min -= pad; max += pad;
-  const x = i => pl + i * (W - pl - pr) / (pts.length - 1);
+  const x = i => pl + i * (W - pl - pr) / (labels.length - 1);
   const y = v => pt + (H - pt - pb) * (1 - (v - min) / (max - min));
   let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img">`;
   for (let k = 0; k <= 3; k++) {
@@ -1555,14 +1676,17 @@ function lineChart(pts, decimals) {
     svg += `<line x1="${pl}" x2="${W - pr}" y1="${yy}" y2="${yy}" stroke="#2c2c38" stroke-width="1"/>`;
     svg += `<text x="${pl - 6}" y="${yy}" fill="#94a3b8" font-size="10" text-anchor="end" dominant-baseline="middle">${v.toFixed(decimals)}</text>`;
   }
-  const path = pts.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(p.y).toFixed(1)}`).join(' ');
-  svg += `<path d="${path}" fill="none" stroke="#818cf8" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
-  pts.forEach((p, i) => {
-    const c = p.newMeso ? '#f59e0b' : '#818cf8';
-    svg += `<circle cx="${x(i).toFixed(1)}" cy="${y(p.y).toFixed(1)}" r="3.5" fill="${c}"/>`;
+  series.forEach(se => {
+    if (se.pts.length > 1) {
+      const path = se.pts.map((p, i) => `${i ? 'L' : 'M'}${x(p.xi).toFixed(1)},${y(p.y).toFixed(1)}`).join(' ');
+      svg += `<path d="${path}" fill="none" stroke="${se.color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+    }
+    se.pts.forEach(p => {
+      svg += `<circle cx="${x(p.xi).toFixed(1)}" cy="${y(p.y).toFixed(1)}" r="3.5" fill="${se.color}"${p.newMeso ? ' stroke="#f59e0b" stroke-width="2.5"' : ''}/>`;
+    });
   });
-  svg += `<text x="${pl}" y="${H - 6}" fill="#94a3b8" font-size="10">${pts[0].label}</text>`;
-  svg += `<text x="${W - pr}" y="${H - 6}" fill="#94a3b8" font-size="10" text-anchor="end">${pts[pts.length - 1].label}</text>`;
+  svg += `<text x="${pl}" y="${H - 6}" fill="#94a3b8" font-size="10">${labels[0]}</text>`;
+  svg += `<text x="${W - pr}" y="${H - 6}" fill="#94a3b8" font-size="10" text-anchor="end">${labels[labels.length - 1]}</text>`;
   svg += `</svg>`;
   return svg;
 }
@@ -1588,25 +1712,36 @@ function renderProgress(exId) {
   const weighted = logs.some(l => isWeighted(l.sets));
   // Si el historial mezcla sesiones con carga y a peso corporal, el gráfico usa solo las del tipo mayoritario.
   const chartLogs = logs.filter(l => isWeighted(l.sets) === weighted);
-  const pts = chartLogs.map((l, i) => ({
-    label: fmtDate(l.date),
-    y: bestScore(l.sets),
-    newMeso: i > 0 && l.mesocycle !== chartLogs[i - 1].mesocycle
-  }));
+  // Una serie por máquina: las cargas no son comparables entre máquinas.
+  const keyOf = l => l.equip || '';
+  const keys = [...new Set(chartLogs.map(keyOf))];
+  const labels = chartLogs.map(l => fmtDate(l.date));
+  const series = keys.map((k, si) => {
+    const own = chartLogs.map((l, xi) => ({ l, xi })).filter(o => keyOf(o.l) === k);
+    return {
+      name: k ? equipName(k) : 'Sin especificar',
+      color: SERIES_COLORS[si % SERIES_COLORS.length],
+      pts: own.map((o, j) => ({ xi: o.xi, y: bestScore(o.l.sets), newMeso: j > 0 && o.l.mesocycle !== own[j - 1].l.mesocycle }))
+    };
+  });
+  const anyNewMeso = series.some(se => se.pts.some(p => p.newMeso));
 
   html += `<div class="chart-card">
     <div class="lbl">${weighted ? 'Mejor serie · 1RM estimado (kg)' : `Mejor serie (${unit})`}</div>
-    ${lineChart(pts, 0)}
-    ${pts.some(p => p.newMeso) ? `<div style="font-size:11px;color:var(--text-muted);margin-top:6px;">● naranja = primera sesión de un nuevo mesociclo (la prescripción puede haber cambiado).</div>` : ''}
+    ${lineChart(series, labels, 0)}
+    ${series.length > 1 ? `<div class="legend">${series.map(se => `<span><i style="background:${se.color}"></i>${escapeHtml(se.name)}</span>`).join('')}</div>` : ''}
+    ${anyNewMeso ? `<div style="font-size:11px;color:var(--text-muted);margin-top:6px;">Borde naranja = primera sesión de un nuevo mesociclo (la prescripción puede haber cambiado).</div>` : ''}
   </div>`;
 
+  const hasEquip = logs.some(l => l.equip);
   html += `<div class="table-wrap"><table>
-    <thead><tr><th>Fecha</th><th>M·S</th><th>Series</th><th>${weighted ? '1RM est.' : 'Mejor'}</th><th>Δ</th></tr></thead>
+    <thead><tr><th>Fecha</th><th>M·S</th>${hasEquip ? '<th>Máquina</th>' : ''}<th>Series</th><th>${weighted ? '1RM est.' : 'Mejor'}</th><th>Δ</th></tr></thead>
     <tbody>`;
   const rows = [];
   logs.forEach((entry, i) => {
     const score = bestScore(entry.sets);
-    const prev = i > 0 ? logs[i - 1] : null;
+    // Δ contra la sesión anterior en la MISMA máquina
+    const prev = logs.slice(0, i).filter(l => sameEquip(l.equip, entry.equip)).pop() || null;
     let delta = '';
     if (prev && isWeighted(prev.sets) === isWeighted(entry.sets)) {
       const d = score - bestScore(prev.sets);
@@ -1616,6 +1751,7 @@ function renderProgress(exId) {
     rows.push(`<tr>
       <td>${fmtDate(entry.date)}</td>
       <td>M${entry.mesocycle ?? '?'}·S${entry.week ?? '?'}</td>
+      ${hasEquip ? `<td>${entry.equip ? escapeHtml(equipName(entry.equip)) : '—'}</td>` : ''}
       <td class="sets-cell">${entry.sets.map(s => fmtSet(s, ex)).join(' · ')}</td>
       <td>${isWeighted(entry.sets) ? score.toFixed(1) + ' kg' : score + ' ' + unit}</td>
       <td>${delta}</td>
@@ -1637,6 +1773,7 @@ function openSettings() {
   document.getElementById('settings-start-date').value = s.startDate || localISO();
   document.getElementById('settings-week-computed').textContent = `Semana calculada: ${computeCurrentWeek(s)} / 8`;
   refreshSyncUI();
+  renderEquipSettings();
   document.getElementById('settings-modal').classList.add('active');
 }
 function closeSettings() { document.getElementById('settings-modal').classList.remove('active'); }
