@@ -68,6 +68,7 @@
       padding: 8px 14px; border: 1px solid var(--border);
       border-radius: 8px; font-size: 13px; font-weight: 600;
       background: none; color: var(--text-dim); cursor: pointer; font-family: inherit;
+      flex-shrink: 0;
     }
     .btn-outline:active { background: var(--surface2); }
 
@@ -90,16 +91,22 @@
     .rest-day .big-icon { font-size: 64px; }
     .rest-day h2 { font-size: 24px; font-weight: 800; }
     .rest-day p { color: var(--text-dim); font-size: 15px; }
-    .overdue-banner { background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.4); color: #f59e0b; border-radius: var(--radius); padding: 12px 14px; font-size: 13px; font-weight: 600; margin-bottom: 14px; }
+    #home-alerts { display: flex; flex-direction: column; gap: 10px; }
+    #home-alerts:empty { display: none; }
+    .alert {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 12px 14px; font-size: 13px; font-weight: 600; color: var(--text-dim);
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .alert.warn { background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.4); color: #f59e0b; }
     .meso-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
     .meso-section h3 { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; }
     .week-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; }
     .week-dot {
       aspect-ratio: 1; border-radius: 8px; border: 1px solid var(--border);
       background: var(--surface2); color: var(--text-muted);
-      font-size: 12px; font-weight: 700; cursor: pointer;
+      font-size: 12px; font-weight: 700;
       display: flex; align-items: center; justify-content: center;
-      transition: background .15s;
     }
     .week-dot.done { background: rgba(16,185,129,.15); border-color: rgba(16,185,129,.3); color: #34d399; }
     .week-dot.active { background: var(--primary); border-color: var(--primary); color: #fff; }
@@ -107,9 +114,7 @@
 
     /* === SESSION SCREEN === */
     .session-body { flex: 1; padding: 14px 14px 24px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
-    .section-label { font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-muted); padding: 10px 4px 4px; }
 
-    /* Normal exercise item */
     .ex-item {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: var(--radius); padding: 14px 14px;
@@ -131,7 +136,6 @@
     .ex-logged-info { font-size: 11px; color: var(--accent); font-weight: 500; margin-top: 2px; }
     .ex-chevron { color: var(--text-muted); font-size: 16px; flex-shrink: 0; }
 
-    /* Biserie / group */
     .group-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
     .group-header {
       padding: 9px 14px;
@@ -157,6 +161,12 @@
     .grp-label.B { background: rgba(37,99,235,.3); color: #93c5fd; }
     .grp-label.calf { background: rgba(8,145,178,.3); color: #67e8f9; }
 
+    /* comparación vs sesión anterior */
+    .cmp { font-size: 12px; font-weight: 800; margin-left: 6px; }
+    .cmp.up { color: #34d399; }
+    .cmp.down { color: #f87171; }
+    .cmp.eq { color: var(--text-dim); }
+
     /* === LOG SCREEN === */
     .log-body { flex: 1; padding: 14px 14px 30px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
 
@@ -164,6 +174,8 @@
     .info-box .lbl { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
     .info-box .val { font-size: 15px; font-weight: 600; }
     .info-box .sub { font-size: 12px; color: var(--text-dim); margin-top: 3px; }
+
+    .hint { background: rgba(16,185,129,.08); border: 1px solid rgba(16,185,129,.3); border-radius: var(--radius); padding: 12px 14px; font-size: 13px; color: #6ee7b7; font-weight: 600; line-height: 1.4; }
 
     .last-ref { background: rgba(99,102,241,.08); border: 1px solid rgba(99,102,241,.2); border-radius: var(--radius); padding: 14px; }
     .last-ref .lbl { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: rgba(99,102,241,.8); margin-bottom: 8px; }
@@ -175,7 +187,6 @@
     }
     .ref-empty { font-size: 13px; color: var(--text-muted); }
 
-    /* Logged sets */
     .sets-area { display: flex; flex-direction: column; gap: 7px; }
     .set-row {
       background: var(--surface); border: 1px solid var(--border);
@@ -186,7 +197,6 @@
     .set-info { flex: 1; font-size: 14px; font-weight: 600; }
     .set-del { background: none; border: none; color: var(--text-muted); font-size: 16px; cursor: pointer; padding: 6px; line-height: 1; }
 
-    /* Input form */
     .log-form { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
     .form-title { font-size: 13px; font-weight: 700; color: var(--text-dim); margin-bottom: 12px; }
     .input-row { display: flex; gap: 12px; margin-bottom: 12px; }
@@ -199,6 +209,7 @@
       font-size: 22px; font-weight: 700; font-family: inherit;
       text-align: center; transition: border-color .15s;
     }
+    .input-grp input::placeholder { color: var(--text-muted); }
     .input-grp input:focus { outline: none; border-color: var(--primary); }
     .input-grp input[type=number]::-webkit-inner-spin-button { opacity: 0; }
 
@@ -213,7 +224,7 @@
     .timer-ring-wrap { position: relative; width: 210px; height: 210px; }
     .timer-ring-wrap svg { position: absolute; inset: 0; transform: rotate(-90deg); }
     .timer-ring-bg { fill: none; stroke: var(--surface3); stroke-width: 6; }
-    .timer-ring-prog { fill: none; stroke: var(--primary); stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset .95s linear; }
+    .timer-ring-prog { fill: none; stroke: var(--primary); stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset .25s linear; }
     .timer-ring-prog.done-flash { stroke: var(--accent); }
     .timer-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     .timer-time { font-size: 56px; font-weight: 900; line-height: 1; }
@@ -225,10 +236,14 @@
     .progress-body { flex: 1; padding: 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
     .prog-ex-header { font-size: 20px; font-weight: 800; line-height: 1.3; }
     .prog-presc { font-size: 13px; color: var(--text-dim); margin-top: 4px; }
+    .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; }
+    .chart-card .lbl { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
+    svg.chart { width: 100%; height: auto; display: block; }
     .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
     thead th { background: var(--surface2); padding: 11px 13px; text-align: left; font-weight: 700; color: var(--text-dim); border-bottom: 1px solid var(--border); white-space: nowrap; }
-    tbody td { padding: 11px 13px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    tbody td { padding: 11px 13px; border-bottom: 1px solid var(--border); white-space: nowrap; vertical-align: top; }
+    tbody td.sets-cell { white-space: normal; line-height: 1.5; min-width: 120px; }
     tbody tr:last-child td { border-bottom: none; }
     tbody tr:nth-child(even) td { background: rgba(255,255,255,.02); }
     .empty-prog { text-align: center; padding: 48px 20px; color: var(--text-muted); font-size: 14px; }
@@ -246,12 +261,15 @@
       background: var(--surface); border-radius: 20px 20px 0 0;
       border: 1px solid var(--border); border-bottom: none;
       padding: 20px 18px 36px; width: 100%; max-width: 520px;
-      max-height: 80dvh; overflow-y: auto;
+      max-height: 85dvh; overflow-y: auto;
     }
     .modal-handle { width: 40px; height: 4px; background: var(--border2); border-radius: 2px; margin: 0 auto 18px; }
     .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 16px; }
     .modal-section { margin-bottom: 20px; }
     .modal-section h4 { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
+    .modal-section p.desc { font-size: 13px; color: var(--text-dim); margin-bottom: 12px; line-height: 1.4; }
+    .btn-pair { display: flex; gap: 10px; }
+    .btn-pair .btn { font-size: 14px; padding: 14px 10px; }
 
     /* Session picker */
     .sessions-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
@@ -270,12 +288,10 @@
     .session-pick-done { font-size: 11px; color: var(--accent); font-weight: 600; margin-top: 2px; }
     .session-pick-chevron { color: var(--text-muted); font-size: 16px; }
 
-    /* scrollbar */
     ::-webkit-scrollbar { width: 3px; height: 3px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-    /* misc */
     .tag { display: inline-block; padding: 3px 8px; border-radius: 5px; font-size: 11px; font-weight: 700; background: var(--surface2); color: var(--text-dim); }
     .tag.activation { background: rgba(245,158,11,.15); color: #fbbf24; }
   </style>
@@ -290,10 +306,10 @@
   </div>
   <div class="home-body">
     <div class="meta-row">
-      <span class="badge primary" id="home-meso-badge">Mesociclo 9</span>
+      <span class="badge primary" id="home-meso-badge">Mesociclo</span>
       <span class="badge accent" id="home-week-badge">Semana 1</span>
     </div>
-    <div id="meso-overdue-banner"></div>
+    <div id="home-alerts"></div>
     <div id="home-session-area"></div>
     <div class="sessions-section">
       <h3>Seleccionar sesión</h3>
@@ -303,7 +319,7 @@
       <h3>Semanas del mesociclo</h3>
       <div class="week-grid" id="week-grid"></div>
       <div class="archive-row">
-        <button class="btn btn-secondary btn-sm" onclick="openSettings()">Ajustes del mesociclo</button>
+        <button class="btn btn-secondary btn-sm" onclick="openSettings()">Ajustes y respaldo</button>
       </div>
     </div>
   </div>
@@ -377,18 +393,29 @@
     </div>
 
     <div class="modal-section">
-      <h4>Archivado</h4>
-      <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px;">Archivar cierra el mesociclo actual y empieza el siguiente con datos en blanco.</p>
-      <button class="btn btn-danger" onclick="archiveMesocycle()">Archivar mesociclo y empezar siguiente</button>
+      <h4>Respaldo completo (restaurable)</h4>
+      <p class="desc">Descarga un archivo .json con todo: registros, mesociclo y archivos. Es lo único que te permite recuperar los datos si el navegador los borra o cambias de móvil.</p>
+      <div class="btn-pair">
+        <button class="btn btn-accent" onclick="exportBackupJSON()">Descargar respaldo</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">Restaurar</button>
+      </div>
+      <input type="file" id="import-file" accept="application/json,.json" style="display:none" onchange="importBackupJSON(this)">
     </div>
 
     <div class="modal-section">
-      <h4>Exportar / respaldar datos</h4>
-      <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px;">Descarga todo el historial de pesos y progresión en un archivo Excel (.csv), o reenvíalo a tu Google Sheet de respaldo.</p>
-      <div style="display:flex;gap:10px;">
+      <h4>Excel y Google Sheet</h4>
+      <p class="desc">Exporta el historial a .csv para analizarlo en Excel, o reenvía todo a la Google Sheet (no duplica filas: cada serie tiene un identificador único).</p>
+      <p id="settings-sync-status" style="font-size:12px;color:var(--text-muted);margin:-4px 0 12px;"></p>
+      <div class="btn-pair">
         <button class="btn btn-secondary" onclick="exportProgressToExcel()">Exportar a Excel</button>
-        <button class="btn btn-secondary" onclick="resyncAllToSheet()">Resincronizar todo</button>
+        <button class="btn btn-secondary" onclick="resyncAllToSheet()">Resincronizar Sheet</button>
       </div>
+    </div>
+
+    <div class="modal-section">
+      <h4>Archivado</h4>
+      <p class="desc">Cierra el mesociclo actual y empieza el siguiente (número +1, fecha de inicio hoy). El historial no se borra. Ojo: el programa de ejercicios se cambia en el código, no aquí.</p>
+      <button class="btn btn-danger" onclick="archiveMesocycle()">Archivar mesociclo y empezar siguiente</button>
     </div>
 
     <div style="display:flex;gap:10px;margin-top:8px;">
@@ -400,11 +427,22 @@
 
 <script>
 // ══════════════════════════════════════════════
+// CONFIGURACIÓN
+// ══════════════════════════════════════════════
+// Número del mesociclo al que corresponde el programa de SESSIONS de abajo.
+const CURRENT_MESO = 10;
+
+// URL del Apps Script (Implementar → Gestionar implementaciones).
+const SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwBRJ5oVMPHlM45GgpPkdn7NPny2MYiwDbCTAFOHseE_9BnayrRANRb-2vUdReqJw9_KQ/exec';
+// 2 = Apps Script nuevo (upsert/borrado por uid, sin duplicados). REQUIERE actualizar el script.
+// 1 = Apps Script antiguo (solo añade filas; los borrados no se sincronizan).
+const SHEET_PROTOCOL = 2;
+
+// ══════════════════════════════════════════════
 // DATA — Sessions
 // ══════════════════════════════════════════════
-// Nombres de ejercicios de mesociclos anteriores, conservados para que el
-// historial guardado (workout_logs) siga mostrando el nombre correcto aunque
-// el ejercicio ya no exista en el SESSIONS del mesociclo actual.
+// Nombres de ejercicios de mesociclos anteriores, para que el historial
+// guardado siga mostrando el nombre correcto.
 const ARCHIVED_EXERCISE_NAMES = {
   lun_1:'Dominada abierto', lun_2:'Jalón al pecho abierto prono', lun_3:'Remo agarre neutro en máquina',
   lun_4:'Remo libre agarre prono', lun_5:'Pull over', lun_6:'Peck deck invertido', lun_7:'Curl bayesian',
@@ -426,88 +464,92 @@ const ARCHIVED_EXERCISE_NAMES = {
   sab_cal_1:'Elevación de talón',
 };
 
+// `hist`: IDs de mesociclos anteriores que son EL MISMO ejercicio. Así "Última sesión",
+// la comparación y el gráfico de progresión continúan entre mesociclos.
+// Al pasar al mesociclo 11: copia estos nombres a ARCHIVED_EXERCISE_NAMES, cambia los
+// ids a m11_..., pon en `hist` el id m10_ equivalente (y los anteriores) y sube CURRENT_MESO.
 const SESSIONS = {
   lunes: {
     name: 'JALÓN',
     dayName: 'Lunes',
     exercises: [
-      { id:'m10_lun_1', name:'Dominada abierto', presc:'1×fallo', sets:1, rest:0, note:'Activación' },
+      { id:'m10_lun_1', hist:['lun_1'], name:'Dominada abierto', presc:'1×fallo', sets:1, rest:0, note:'Activación' },
       { id:'m10_lun_2', name:'Remo en T agarre prono pecho apoyado', presc:'2×8-10', sets:2, rest:120 },
-      { id:'m10_lun_3', name:'Remo agarre neutro en máquina', presc:'2×8-10', sets:2, rest:120 },
-      { id:'m10_lun_4', name:'Curl bayesian', presc:'3×10-8', sets:3, rest:120 },
-      { id:'m10_lun_5', name:'Peck deck invertido', presc:'2×10-12', sets:2, rest:90 },
-      { id:'m10_lun_6', name:'Curl predicador unilateral (pesado)', presc:'2×8-10', sets:2, rest:120 },
+      { id:'m10_lun_3', hist:['lun_3'], name:'Remo agarre neutro en máquina', presc:'2×8-10', sets:2, rest:120 },
+      { id:'m10_lun_4', hist:['lun_7'], name:'Curl bayesian', presc:'3×10-8', sets:3, rest:120 },
+      { id:'m10_lun_5', hist:['lun_6'], name:'Peck deck invertido', presc:'2×10-12', sets:2, rest:90 },
+      { id:'m10_lun_6', hist:['lun_8'], name:'Curl predicador unilateral (pesado)', presc:'2×8-10', sets:2, rest:120 },
       { id:'m10_lun_7', name:'Martillos con mancuerna', presc:'2×10-12', sets:2, rest:120 },
-      { id:'m10_lun_abs_a', name:'Crunch en polea con cuerda (pesado)', presc:'3×12-10', sets:3, rest:null, group:'m10_lun_abs', groupType:'abs', groupLabel:'ABS — Biserie', groupRole:'A' },
-      { id:'m10_lun_abs_b', name:'Elevación de pies acostado', presc:'3×fallo', sets:3, rest:120, group:'m10_lun_abs', groupType:'abs', groupLabel:'ABS — Biserie', groupRole:'B' },
+      { id:'m10_lun_abs_a', hist:['lun_abs_a'], name:'Crunch en polea con cuerda (pesado)', presc:'3×12-10', sets:3, rest:null, group:'m10_lun_abs', groupType:'abs', groupLabel:'ABS — Biserie', groupRole:'A' },
+      { id:'m10_lun_abs_b', hist:['lun_abs_b'], name:'Elevación de pies acostado', presc:'3×fallo', sets:3, rest:120, group:'m10_lun_abs', groupType:'abs', groupLabel:'ABS — Biserie', groupRole:'B' },
     ]
   },
   martes: {
     name: 'PIERNA',
     dayName: 'Martes',
     exercises: [
-      { id:'m10_mar_1', name:'Aductor de cadera', presc:'2×10-12', sets:2, rest:120 },
-      { id:'m10_mar_2', name:'Sentadilla hack (control)', presc:'2×12-10', sets:2, rest:120 },
-      { id:'m10_mar_3', name:'Extensión de cuádriceps (pesadas)', presc:'3×12-10', sets:3, rest:120 },
-      { id:'m10_mar_4', name:'Curl femoral sentado', presc:'3×10-8', sets:3, rest:120 },
-      { id:'m10_mar_5', name:'Puentes con barra o máquina', presc:'3×8-10', sets:3, rest:120 },
-      { id:'m10_mar_6', name:'Femoral acostado', presc:'2×8-10', sets:2, rest:120 },
-      { id:'m10_mar_cal_1', name:'Elevación de talón', presc:'3×12', sets:3, rest:120, group:'m10_mar_cal', groupType:'pantorrilla', groupLabel:'Pantorrilla', groupRole:'calf' },
+      { id:'m10_mar_1', hist:['mar_1'], name:'Aductor de cadera', presc:'2×10-12', sets:2, rest:120 },
+      { id:'m10_mar_2', hist:['mar_2'], name:'Sentadilla hack (control)', presc:'2×12-10', sets:2, rest:120 },
+      { id:'m10_mar_3', hist:['mar_4'], name:'Extensión de cuádriceps (pesadas)', presc:'3×12-10', sets:3, rest:120 },
+      { id:'m10_mar_4', hist:['mar_5'], name:'Curl femoral sentado', presc:'3×10-8', sets:3, rest:120 },
+      { id:'m10_mar_5', hist:['mar_6'], name:'Puentes con barra o máquina', presc:'3×8-10', sets:3, rest:120 },
+      { id:'m10_mar_6', hist:['mar_7'], name:'Femoral acostado', presc:'2×8-10', sets:2, rest:120 },
+      { id:'m10_mar_cal_1', hist:['mar_cal_1'], name:'Elevación de talón', presc:'3×12', sets:3, rest:120, group:'m10_mar_cal', groupType:'pantorrilla', groupLabel:'Pantorrilla', groupRole:'calf' },
     ]
   },
   miercoles: {
     name: 'EMPUJE',
     dayName: 'Miércoles',
     exercises: [
-      { id:'m10_mie_1', name:'Press inclinado con mancuernas', presc:'1×8 + 1×12-10 (back off)', sets:2, rest:120 },
-      { id:'m10_mie_2', name:'Peck deck', presc:'2×10-12', sets:2, rest:120 },
-      { id:'m10_mie_3', name:'Vuelos laterales parado con mancuernas (pecho en banco inclinado)', presc:'3×10-12', sets:3, rest:90 },
-      { id:'m10_mie_4', name:'Fondos libres enfoque pecho', presc:'2×fallo', sets:2, rest:120 },
-      { id:'m10_mie_5', name:'Vuelos laterales en polea unilateral', presc:'3×8-10', sets:3, rest:120 },
-      { id:'m10_mie_6', name:'Copa en polea media con cuerda', presc:'2×8-10', sets:2, rest:90 },
-      { id:'m10_mie_7', name:'Extensión 1 mano', presc:'3×12-10', sets:3, rest:90 },
-      { id:'m10_mie_abs_a', name:'Crunch en poleas', presc:'3×15', sets:3, rest:120, group:'m10_mie_abs', groupType:'abs', groupLabel:'ABS — Biserie', groupRole:'A' },
-      { id:'m10_mie_abs_b', name:'Plancha', presc:'3×60 seg', sets:3, rest:120, unit:'seg', group:'m10_mie_abs', groupType:'abs', groupLabel:'ABS — Biserie', groupRole:'B' },
+      { id:'m10_mie_1', hist:['mie_1'], name:'Press inclinado con mancuernas', presc:'1×8 + 1×12-10 (back off)', sets:2, rest:120 },
+      { id:'m10_mie_2', hist:['mie_2'], name:'Peck deck', presc:'2×10-12', sets:2, rest:120 },
+      { id:'m10_mie_3', hist:['mie_3'], name:'Vuelos laterales parado con mancuernas (pecho en banco inclinado)', presc:'3×10-12', sets:3, rest:90 },
+      { id:'m10_mie_4', hist:['mie_4'], name:'Fondos libres enfoque pecho', presc:'2×fallo', sets:2, rest:120 },
+      { id:'m10_mie_5', hist:['mie_5'], name:'Vuelos laterales en polea unilateral', presc:'3×8-10', sets:3, rest:120 },
+      { id:'m10_mie_6', hist:['mie_6'], name:'Copa en polea media con cuerda', presc:'2×8-10', sets:2, rest:90 },
+      { id:'m10_mie_7', hist:['mie_7'], name:'Extensión 1 mano', presc:'3×12-10', sets:3, rest:90 },
+      { id:'m10_mie_abs_a', hist:['mie_abs_a'], name:'Crunch en poleas', presc:'3×15', sets:3, rest:120, group:'m10_mie_abs', groupType:'abs', groupLabel:'ABS — Biserie', groupRole:'A' },
+      { id:'m10_mie_abs_b', hist:['mie_abs_b'], name:'Plancha', presc:'3×60 seg', sets:3, rest:120, unit:'seg', group:'m10_mie_abs', groupType:'abs', groupLabel:'ABS — Biserie', groupRole:'B' },
     ]
   },
   jueves: {
     name: 'JALÓN',
     dayName: 'Jueves',
     exercises: [
-      { id:'m10_jue_1', name:'Dominada abierto agarre neutro', presc:'1×fallo', sets:1, rest:0, note:'Activación' },
+      { id:'m10_jue_1', hist:['jue_1'], name:'Dominada abierto agarre neutro', presc:'1×fallo', sets:1, rest:0, note:'Activación' },
       { id:'m10_jue_2', name:'Remo en T agarre prono pecho apoyado', presc:'3×8-10', sets:3, rest:120 },
-      { id:'m10_jue_3', name:'Curl con barra recta en polea', presc:'3×8', sets:3, rest:120 },
-      { id:'m10_jue_4', name:'Remo cerrado unilateral', presc:'2×8-10', sets:2, rest:120 },
-      { id:'m10_jue_5', name:'Predicador a 1 mano', presc:'2×10-12', sets:2, rest:120 },
+      { id:'m10_jue_3', hist:['jue_7'], name:'Curl con barra recta en polea', presc:'3×8', sets:3, rest:120 },
+      { id:'m10_jue_4', hist:['jue_3'], name:'Remo cerrado unilateral', presc:'2×8-10', sets:2, rest:120 },
+      { id:'m10_jue_5', hist:['jue_6'], name:'Predicador a 1 mano', presc:'2×10-12', sets:2, rest:120 },
       { id:'m10_jue_6', name:'Martillos con mancuerna', presc:'2×10-8', sets:2, rest:120 },
-      { id:'m10_jue_cal_1', name:'Elevación de talón', presc:'3×10-12', sets:3, rest:100, group:'m10_jue_cal', groupType:'pantorrilla', groupLabel:'Pantorrilla', groupRole:'calf' },
+      { id:'m10_jue_cal_1', hist:['jue_cal_1'], name:'Elevación de talón', presc:'3×10-12', sets:3, rest:100, group:'m10_jue_cal', groupType:'pantorrilla', groupLabel:'Pantorrilla', groupRole:'calf' },
     ]
   },
   viernes: {
     name: 'PIERNA',
     dayName: 'Viernes',
     exercises: [
-      { id:'m10_vie_1', name:'Femoral acostado (unilateral)', presc:'2×12-10-8', sets:2, rest:120 },
-      { id:'m10_vie_2', name:'Peso muerto rumano', presc:'2×10-12', sets:2, rest:150 },
+      { id:'m10_vie_1', hist:['vie_1'], name:'Femoral acostado (unilateral)', presc:'2×12-10-8', sets:2, rest:120 },
+      { id:'m10_vie_2', hist:['vie_2'], name:'Peso muerto rumano', presc:'2×10-12', sets:2, rest:150 },
       { id:'m10_vie_3', name:'Puentes con barra o máquina', presc:'2×8-10', sets:2, rest:120 },
-      { id:'m10_vie_4', name:'Prensa a 2 piernas', presc:'2×8-10', sets:2, rest:120 },
-      { id:'m10_vie_5', name:'Femoral sentado', presc:'2×10-8', sets:2, rest:120 },
-      { id:'m10_vie_6', name:'Extensión de cuads (máxima intensidad)', presc:'2×12', sets:2, rest:120 },
-      { id:'m10_vie_abs_a', name:'Crunch en polea con cuerda (pesado)', presc:'3×12-10', sets:3, rest:null, group:'m10_vie_abs', groupType:'abs', groupLabel:'ABS — Biserie', groupRole:'A' },
-      { id:'m10_vie_abs_b', name:'Elevación de pies acostado', presc:'3×fallo', sets:3, rest:120, group:'m10_vie_abs', groupType:'abs', groupLabel:'ABS — Biserie', groupRole:'B' },
+      { id:'m10_vie_4', hist:['vie_3'], name:'Prensa a 2 piernas', presc:'2×8-10', sets:2, rest:120 },
+      { id:'m10_vie_5', hist:['vie_4'], name:'Femoral sentado', presc:'2×10-8', sets:2, rest:120 },
+      { id:'m10_vie_6', hist:['vie_5'], name:'Extensión de cuads (máxima intensidad)', presc:'2×12', sets:2, rest:120 },
+      { id:'m10_vie_abs_a', hist:['vie_abs_a'], name:'Crunch en polea con cuerda (pesado)', presc:'3×12-10', sets:3, rest:null, group:'m10_vie_abs', groupType:'abs', groupLabel:'ABS — Biserie', groupRole:'A' },
+      { id:'m10_vie_abs_b', hist:['vie_abs_b'], name:'Elevación de pies acostado', presc:'3×fallo', sets:3, rest:120, group:'m10_vie_abs', groupType:'abs', groupLabel:'ABS — Biserie', groupRole:'B' },
     ]
   },
   sabado: {
     name: 'EMPUJE',
     dayName: 'Sábado',
     exercises: [
-      { id:'m10_sab_1', name:'Press de hombro con mancuernas', presc:'2×8-10', sets:2, rest:120 },
-      { id:'m10_sab_2', name:'Vuelo en polea baja', presc:'3×10-8', sets:3, rest:120 },
+      { id:'m10_sab_1', hist:['sab_1'], name:'Press de hombro con mancuernas', presc:'2×8-10', sets:2, rest:120 },
+      { id:'m10_sab_2', hist:['sab_3'], name:'Vuelo en polea baja', presc:'3×10-8', sets:3, rest:120 },
       { id:'m10_sab_3', name:'Peck deck', presc:'2×10-12', sets:2, rest:120 },
-      { id:'m10_sab_4', name:'Vuelos laterales con mancuerna', presc:'3×10-8', sets:3, rest:60 },
-      { id:'m10_sab_5', name:'Rompe cráneos en banco inclinado', presc:'2×10-12', sets:2, rest:120 },
+      { id:'m10_sab_4', hist:['sab_5'], name:'Vuelos laterales con mancuerna', presc:'3×10-8', sets:3, rest:60 },
+      { id:'m10_sab_5', hist:['sab_6'], name:'Rompe cráneos en banco inclinado', presc:'2×10-12', sets:2, rest:120 },
       { id:'m10_sab_6', name:'Extensión a 1 mano', presc:'2×8-10', sets:2, rest:210 },
-      { id:'m10_sab_cal_1', name:'Elevación de talón', presc:'3×10-12', sets:3, rest:90, group:'m10_sab_cal', groupType:'pantorrilla', groupLabel:'Pantorrilla', groupRole:'calf' },
+      { id:'m10_sab_cal_1', hist:['sab_cal_1'], name:'Elevación de talón', presc:'3×10-12', sets:3, rest:90, group:'m10_sab_cal', groupType:'pantorrilla', groupLabel:'Pantorrilla', groupRole:'calf' },
     ]
   }
 };
@@ -515,36 +557,64 @@ const SESSIONS = {
 const DAY_MAP = { 0:null, 1:'lunes', 2:'martes', 3:'miercoles', 4:'jueves', 5:'viernes', 6:'sabado' };
 
 // ══════════════════════════════════════════════
+// FECHAS / IDS
+// ══════════════════════════════════════════════
+// Fecha LOCAL YYYY-MM-DD (antes se usaba toISOString(), que da la fecha UTC:
+// un entreno entre 00:00 y 01:00 en Lisboa quedaba con la fecha de ayer).
+function localISO(d = new Date()) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${dd}`;
+}
+function newUid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+// ══════════════════════════════════════════════
 // STORAGE
 // ══════════════════════════════════════════════
-function getState() {
+function readJSON(key, fallback) {
   try {
-    return JSON.parse(localStorage.getItem('meso_state') || '{}');
-  } catch { return {}; }
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch { return fallback; }
 }
+function getState() { return readJSON('meso_state', {}); }
 function setState(s) { localStorage.setItem('meso_state', JSON.stringify(s)); }
-function getLogs() {
-  try {
-    return JSON.parse(localStorage.getItem('workout_logs') || '[]');
-  } catch { return []; }
-}
+function getLogs() { return readJSON('workout_logs', []); }
 function saveLogs(logs) { localStorage.setItem('workout_logs', JSON.stringify(logs)); }
+function getArchives() { return readJSON('meso_archives', []); }
 
 function initState() {
-  let s = getState();
-  if (!s.mesocycle) s.mesocycle = 9;
-  if (!s.startDate) s.startDate = new Date().toISOString().slice(0,10);
-  setState(s);
+  const s = getState();
+  let changed = false;
+  if (!s.mesocycle) { s.mesocycle = CURRENT_MESO; changed = true; }
+  if (!s.startDate) { s.startDate = localISO(); changed = true; }
+  if (changed) setState(s);
   return s;
 }
 
-// Semana calculada a partir de la fecha de inicio (bloques de 7 días exactos).
-// Ya no se guarda/edita a mano — la fecha de inicio es el único mecanismo de ajuste.
+// Añade identificadores únicos a registros antiguos (necesarios para sincronizar
+// con la Sheet sin duplicar). No modifica pesos, reps ni fechas.
+function migrateData() {
+  const logs = getLogs();
+  let changed = false;
+  logs.forEach(entry => {
+    if (!entry.id) { entry.id = newUid(); changed = true; }
+    if (!Array.isArray(entry.sets)) { entry.sets = []; changed = true; }
+    entry.sets.forEach(s => {
+      if (!s.uid) { s.uid = newUid(); changed = true; }
+    });
+  });
+  if (changed) saveLogs(logs);
+}
+
 function computeCurrentWeek(s) {
   if (!s.startDate) return 1;
   const start = new Date(s.startDate + 'T00:00:00');
   const now = new Date(); now.setHours(0,0,0,0);
-  const daysSince = Math.floor((now - start) / 86400000);
+  const daysSince = Math.round((now - start) / 86400000);
   if (daysSince < 0) return 1;
   return Math.min(Math.floor(daysSince / 7) + 1, 8);
 }
@@ -552,27 +622,19 @@ function isMesocycleOverdue(s) {
   if (!s.startDate) return false;
   const start = new Date(s.startDate + 'T00:00:00');
   const now = new Date(); now.setHours(0,0,0,0);
-  const daysSince = Math.floor((now - start) / 86400000);
+  const daysSince = Math.round((now - start) / 86400000);
   return Math.floor(daysSince / 7) + 1 > 8;
 }
 
 // ══════════════════════════════════════════════
 // APP STATE
 // ══════════════════════════════════════════════
-let appState = {
-  currentDay: null,    // e.g. 'lunes'
-  currentExId: null,   // exercise id being logged
-  prevScreen: 'session'
-};
-let timerState = { id: null, total: 0, remaining: 0, active: false };
+let appState = { currentDay: null, currentExId: null };
 
 // ══════════════════════════════════════════════
 // HELPERS
 // ══════════════════════════════════════════════
-function todayKey() {
-  const d = new Date().getDay();
-  return DAY_MAP[d];
-}
+function todayKey() { return DAY_MAP[new Date().getDay()]; }
 
 function fmtDate(iso) {
   const [y,m,d] = iso.split('-');
@@ -585,57 +647,252 @@ function exById(id) {
     if (ex) return ex;
   }
   if (ARCHIVED_EXERCISE_NAMES[id]) {
-    return { id, name: ARCHIVED_EXERCISE_NAMES[id], presc: '—', sets: 0, rest: null, archived: true };
+    // Hereda la unidad (reps/seg) del ejercicio actual equivalente, si lo hay.
+    let successor = null;
+    for (const day of Object.values(SESSIONS)) {
+      successor = day.exercises.find(e => e.hist && e.hist.includes(id));
+      if (successor) break;
+    }
+    return { id, name: ARCHIVED_EXERCISE_NAMES[id], presc: '—', sets: 0, rest: null, archived: true, unit: successor ? successor.unit : undefined };
   }
   return null;
 }
+function unitOf(ex) { return ex && ex.unit === 'seg' ? 'seg' : 'reps'; }
 
-// Get logs for a specific exercise, sorted by date
+// El ejercicio actual + sus equivalentes de mesociclos anteriores.
+function lineage(exId) {
+  const ex = exById(exId);
+  return [exId, ...(ex && ex.hist ? ex.hist : [])];
+}
+
+// Historial de un ejercicio (incluye mesociclos anteriores), ordenado por fecha.
 function getExLogs(exId) {
+  const ids = lineage(exId);
   return getLogs()
-    .filter(l => l.exId === exId)
+    .filter(l => ids.includes(l.exId) && l.sets && l.sets.length)
     .sort((a,b) => a.date.localeCompare(b.date));
 }
 
-// ══════════════════════════════════════════════
-// GOOGLE SHEETS SYNC (respaldo, una sola vía app → Sheet)
-// ══════════════════════════════════════════════
-const SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwBRJ5oVMPHlM45GgpPkdn7NPny2MYiwDbCTAFOHseE_9BnayrRANRb-2vUdReqJw9_KQ/exec';
+// Última sesión ANTERIOR a hoy.
+function getPrevEntry(exId) {
+  const today = localISO();
+  const prev = getExLogs(exId).filter(l => l.date < today);
+  return prev.length ? prev[prev.length - 1] : null;
+}
 
-function pushToSheet(exId, entry, setObj) {
-  if (!SHEET_WEBHOOK_URL) return;
-  const ex = exById(exId);
-  const payload = {
+function findTodayEntry(logs, exId) {
+  const today = localISO();
+  const s = getState();
+  const week = computeCurrentWeek(s);
+  return logs.find(l => l.exId === exId && l.date === today && l.mesocycle === s.mesocycle && l.week === week) || null;
+}
+function getTodayLogSets(exId) {
+  const entry = findTodayEntry(getLogs(), exId);
+  return entry ? entry.sets : [];
+}
+
+// ══════════════════════════════════════════════
+// MÉTRICAS DE PROGRESIÓN
+// ══════════════════════════════════════════════
+// 1RM estimado (Epley) para series con carga; reps (o segundos) para peso corporal.
+function setScore(s) { return s.weight > 0 ? s.weight * (1 + s.reps / 30) : s.reps; }
+function bestScore(sets) { return sets.length ? Math.max(...sets.map(setScore)) : 0; }
+function isWeighted(sets) { return sets.some(s => s.weight > 0); }
+
+// Compara una serie con la equivalente de la sesión anterior: 1 mejor, 0 igual, -1 peor, null no comparable.
+// Reglas (doble progresión):
+//  - mismo peso → mandan las reps;
+//  - más peso y reps todavía dentro del rango prescrito → ▲ (es la subida de carga esperada);
+//  - resto de casos → 1RM estimado (Epley).
+function cmpSets(a, b, ex) {
+  if (!a || !b) return null;
+  if ((a.weight > 0) !== (b.weight > 0)) return null;
+  if (a.weight === b.weight) return Math.sign(a.reps - b.reps);
+  const floor = ex ? repFloor(ex) : null;
+  if (a.weight > b.weight && floor !== null && a.reps >= floor) return 1;
+  const d = setScore(a) - setScore(b);
+  return Math.abs(d) < 0.5 ? 0 : Math.sign(d);
+}
+// Sesión completa: suma de las comparaciones serie a serie (S1 vs S1, S2 vs S2…).
+function cmpSessions(todaySets, prevSets, ex) {
+  if (!todaySets.length || !prevSets || !prevSets.length) return null;
+  const cs = todaySets.map((s, i) => cmpSets(s, prevSets[i], ex)).filter(c => c !== null);
+  if (!cs.length) return null;
+  return Math.sign(cs.reduce((a, c) => a + c, 0));
+}
+// Mínimo de reps de la prescripción ("3×12-10" → 10, "2×8-10" → 8, "3×15" → 15). null para fallo/segundos.
+function repFloor(ex) {
+  if (!ex.presc || ex.unit === 'seg') return null;
+  const nums = [];
+  ex.presc.replace(/×\s*([\d\s-]+)/g, (_, grp) => { grp.split('-').forEach(n => { const v = parseInt(n, 10); if (v > 0) nums.push(v); }); });
+  return nums.length ? Math.min(...nums) : null;
+}
+function cmpTag(c) {
+  if (c === null || c === undefined) return '';
+  if (c > 0) return '<span class="cmp up">▲</span>';
+  if (c < 0) return '<span class="cmp down">▼</span>';
+  return '<span class="cmp eq">=</span>';
+}
+
+// Rango de reps ascendente simple ("2×8-10"). Devuelve null para notaciones
+// descendentes/piramidales ("3×12-10", "2×12-10-8"), fallo o prescripciones compuestas,
+// porque ahí la regla de "tope del rango" no es inequívoca.
+function repRange(ex) {
+  if (!ex.presc || ex.presc.includes('+')) return null;
+  const m = ex.presc.match(/×\s*(\d+)\s*-\s*(\d+)(?![\d-])/);
+  if (!m) return null;
+  const lo = +m[1], hi = +m[2];
+  return lo < hi ? { lo, hi } : null;
+}
+
+function fmtSet(s, ex) {
+  const w = s.weight > 0 ? `${s.weight}kg` : 'PC';
+  return `${w}×${s.reps}${unitOf(ex) === 'seg' ? 's' : ''}`;
+}
+
+// ══════════════════════════════════════════════
+// GOOGLE SHEETS SYNC (app → Sheet, con cola offline)
+// ══════════════════════════════════════════════
+// Cada serie tiene un uid. Los cambios se guardan en una cola en el móvil y se
+// envían cuando hay conexión; el Apps Script hace upsert/borrado por uid, así
+// que reenviar no duplica filas.
+function getSyncQueue() {
+  const q = readJSON('sync_queue', null);
+  return q && Array.isArray(q.up) && Array.isArray(q.del) ? q : { up: [], del: [] };
+}
+function setSyncQueue(q) { localStorage.setItem('sync_queue', JSON.stringify(q)); }
+function pendingCount() { const q = getSyncQueue(); return q.up.length + q.del.length; }
+
+function queueUpsert(uids) {
+  const q = getSyncQueue();
+  uids.forEach(u => {
+    if (!q.up.includes(u)) q.up.push(u);
+    q.del = q.del.filter(x => x !== u);
+  });
+  setSyncQueue(q);
+  flushSync();
+}
+function queueDelete(uids) {
+  const q = getSyncQueue();
+  uids.forEach(u => {
+    q.up = q.up.filter(x => x !== u);
+    if (SHEET_PROTOCOL >= 2 && !q.del.includes(u)) q.del.push(u);
+  });
+  setSyncQueue(q);
+  flushSync();
+}
+
+function indexSets() {
+  const idx = {};
+  getLogs().forEach(entry => (entry.sets || []).forEach(s => { if (s.uid) idx[s.uid] = { entry, set: s }; }));
+  return idx;
+}
+
+function setPayload(entry, s) {
+  const ex = exById(entry.exId);
+  const base = {
     date: entry.date, mesocycle: entry.mesocycle, week: entry.week, day: entry.day,
-    exId, exName: ex ? ex.name : exId, setN: setObj.n, weight: setObj.weight, reps: setObj.reps
+    exId: entry.exId, exName: ex ? ex.name : entry.exId,
+    setN: s.n, weight: s.weight, reps: s.reps
   };
-  fetch(SHEET_WEBHOOK_URL, {
-    method: 'POST', mode: 'no-cors',
-    headers: { 'Content-Type': 'text/plain' },
-    body: JSON.stringify(payload)
-  }).catch(() => {});
+  if (SHEET_PROTOCOL >= 2) { base.uid = s.uid; base.unit = unitOf(ex); }
+  return base;
+}
+
+// Intenta una petición normal (permite leer la respuesta); si el navegador la bloquea
+// por CORS, reintenta en modo no-cors. Es seguro reenviar porque el script es idempotente.
+async function postSheet(body) {
+  const opts = { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) };
+  try {
+    const r = await fetch(SHEET_WEBHOOK_URL, opts);
+    if (!r.ok) return false;
+    try { const j = await r.json(); return j.ok !== false; } catch { return true; }
+  } catch {
+    try { await fetch(SHEET_WEBHOOK_URL, { ...opts, mode: 'no-cors' }); return true; }
+    catch { return false; }
+  }
+}
+
+let syncing = false, syncAgain = false;
+async function flushSync() {
+  if (!SHEET_WEBHOOK_URL) return;
+  if (syncing) { syncAgain = true; return; }
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) { refreshSyncUI(); return; }
+  syncing = true;
+  try {
+    const q = getSyncQueue();
+    const done = { up: new Set(), del: new Set() };
+
+    if (q.del.length && SHEET_PROTOCOL >= 2) {
+      if (await postSheet({ action: 'delete', uids: q.del })) q.del.forEach(u => done.del.add(u));
+    }
+
+    if (q.up.length) {
+      const idx = indexSets();
+      // uids que ya no existen (borrados) se descartan de la cola.
+      q.up.filter(u => !idx[u]).forEach(u => done.up.add(u));
+      const live = q.up.filter(u => idx[u]);
+      if (SHEET_PROTOCOL >= 2) {
+        for (let i = 0; i < live.length; i += 150) {
+          const chunk = live.slice(i, i + 150);
+          const ok = await postSheet({ action: 'upsert', rows: chunk.map(u => setPayload(idx[u].entry, idx[u].set)) });
+          if (!ok) break;
+          chunk.forEach(u => done.up.add(u));
+        }
+      } else {
+        for (const u of live) {
+          if (!(await postSheet(setPayload(idx[u].entry, idx[u].set)))) break;
+          done.up.add(u);
+        }
+      }
+    }
+
+    const cur = getSyncQueue();
+    cur.up = cur.up.filter(u => !done.up.has(u));
+    cur.del = cur.del.filter(u => !done.del.has(u));
+    setSyncQueue(cur);
+    if (done.up.size || done.del.size) localStorage.setItem('last_sync', new Date().toISOString());
+  } finally {
+    syncing = false;
+    refreshSyncUI();
+    if (syncAgain) { syncAgain = false; setTimeout(flushSync, 0); }
+  }
 }
 
 function resyncAllToSheet() {
-  if (!SHEET_WEBHOOK_URL) {
-    alert('Todavía no has configurado la URL del Google Sheet (SHEET_WEBHOOK_URL).');
-    return;
+  if (!SHEET_WEBHOOK_URL) { alert('No hay URL de Google Sheet configurada (SHEET_WEBHOOK_URL).'); return; }
+  if (SHEET_PROTOCOL < 2 && !confirm('Con el Apps Script antiguo, resincronizar DUPLICA todas las filas en la Sheet. ¿Continuar?')) return;
+  const uids = Object.keys(indexSets());
+  queueUpsert(uids);
+  alert(`${uids.length} series en cola para la Google Sheet. El estado se ve en Ajustes y en la pantalla de inicio.`);
+}
+
+function refreshSyncUI() {
+  const el = document.getElementById('settings-sync-status');
+  if (el) {
+    const n = pendingCount();
+    const ls = localStorage.getItem('last_sync');
+    el.textContent = (n ? `⏳ ${n} cambios pendientes de enviar. ` : '✓ Sin cambios pendientes. ')
+      + (ls ? `Último envío: ${new Date(ls).toLocaleString('es-ES')}` : '');
   }
-  const logs = getLogs();
-  let count = 0;
-  logs.forEach(entry => {
-    if (!entry.sets || !entry.sets.length) return;
-    entry.sets.forEach(setObj => {
-      pushToSheet(entry.exId, entry, setObj);
-      count++;
-    });
-  });
-  alert(`Reenviando ${count} series a la Google Sheet...`);
+  if (document.getElementById('screen-home').classList.contains('active')) renderAlerts(getState());
 }
 
 // ══════════════════════════════════════════════
-// EXPORT — Excel (CSV)
+// EXPORT / RESPALDO
 // ══════════════════════════════════════════════
+function downloadFile(name, content, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
 function csvEscape(val) {
   const s = String(val ?? '');
   return /[";\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
@@ -643,89 +900,89 @@ function csvEscape(val) {
 
 function exportProgressToExcel() {
   const logs = getLogs().slice().sort((a,b) => a.date.localeCompare(b.date));
-  if (!logs.length) {
-    alert('No hay datos registrados todavía.');
-    return;
-  }
+  if (!logs.some(l => l.sets && l.sets.length)) { alert('No hay datos registrados todavía.'); return; }
 
-  const rows = [['Fecha', 'Mesociclo', 'Semana', 'Día', 'Ejercicio', 'Serie', 'Peso (kg)', 'Reps']];
+  const rows = [['Fecha', 'Mesociclo', 'Semana', 'Día', 'Ejercicio', 'Serie', 'Peso (kg)', 'Reps/Seg', 'Unidad', '1RM est. (kg)']];
   logs.forEach(entry => {
     if (!entry.sets || !entry.sets.length) return;
     const ex = exById(entry.exId);
     const day = entry.day || DAY_MAP[new Date(entry.date + 'T00:00:00').getDay()] || '';
     entry.sets.forEach(s => {
       rows.push([
-        entry.date,
-        entry.mesocycle ?? '',
-        entry.week ?? '',
-        day,
-        ex ? ex.name : entry.exId,
-        s.n,
-        s.weight > 0 ? s.weight : 'PC',
-        s.reps
+        entry.date, entry.mesocycle ?? '', entry.week ?? '', day,
+        ex ? ex.name : entry.exId, s.n,
+        s.weight > 0 ? String(s.weight).replace('.', ',') : 'PC',
+        s.reps, unitOf(ex),
+        s.weight > 0 ? setScore(s).toFixed(1).replace('.', ',') : ''
       ]);
     });
   });
-
-  const csv = '﻿' + rows.map(r => r.map(csvEscape).join(';')).join('\r\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `progresion_${new Date().toISOString().slice(0,10)}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  const csv = '\uFEFF' + rows.map(r => r.map(csvEscape).join(';')).join('\r\n');
+  downloadFile(`progresion_${localISO()}.csv`, csv, 'text/csv;charset=utf-8;');
 }
 
-// Get last session logs for an exercise (previous date)
-function getLastSessionSets(exId) {
-  const logs = getExLogs(exId);
-  if (!logs.length) return [];
-  const last = logs[logs.length - 1];
-  return last.sets || [];
+function exportBackupJSON() {
+  const data = {
+    app: 'entrenamiento', version: 2, exportedAt: new Date().toISOString(),
+    meso_state: getState(), workout_logs: getLogs(), meso_archives: getArchives()
+  };
+  downloadFile(`respaldo_entreno_${localISO()}.json`, JSON.stringify(data), 'application/json');
+  localStorage.setItem('last_backup', new Date().toISOString());
+  refreshSyncUI();
 }
 
-// Get today's log entry for an exercise (current session)
-function getTodayLog(exId) {
-  const today = new Date().toISOString().slice(0,10);
-  const s = getState();
-  const week = computeCurrentWeek(s);
-  return getLogs().find(l => l.exId === exId && l.date === today && l.mesocycle === s.mesocycle && l.week === week) || null;
+function importBackupJSON(input) {
+  const file = input.files && input.files[0];
+  input.value = '';
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    let data;
+    try { data = JSON.parse(reader.result); } catch { alert('El archivo no es un JSON válido.'); return; }
+    if (!data || !Array.isArray(data.workout_logs)) { alert('Este archivo no parece un respaldo de la app.'); return; }
+    const nNew = data.workout_logs.reduce((a, l) => a + ((l.sets || []).length), 0);
+    const nCur = getLogs().reduce((a, l) => a + ((l.sets || []).length), 0);
+    if (!confirm(`Vas a REEMPLAZAR ${nCur} series actuales por ${nNew} series del respaldo (${data.exportedAt ? new Date(data.exportedAt).toLocaleString('es-ES') : 'fecha desconocida'}).\n\nAntes se descargará un respaldo del estado actual por si acaso. ¿Continuar?`)) return;
+    exportBackupJSON();
+    saveLogs(data.workout_logs);
+    if (data.meso_state && typeof data.meso_state === 'object') setState(data.meso_state);
+    localStorage.setItem('meso_archives', JSON.stringify(Array.isArray(data.meso_archives) ? data.meso_archives : []));
+    migrateData();
+    closeSettings();
+    goHome();
+    alert(`Respaldo restaurado: ${nNew} series. Si quieres que la Google Sheet refleje esto, usa "Resincronizar Sheet".`);
+  };
+  reader.readAsText(file);
 }
 
-function getTodayLogSets(exId) {
-  const entry = getTodayLog(exId);
-  return entry ? entry.sets : [];
-}
-
+// ══════════════════════════════════════════════
+// SETS — guardar / borrar
+// ══════════════════════════════════════════════
 function saveSet(exId, weight, reps) {
-  const today = new Date().toISOString().slice(0,10);
-  const s = getState();
-  const week = computeCurrentWeek(s);
-  let logs = getLogs();
-  let entry = logs.find(l => l.exId === exId && l.date === today && l.mesocycle === s.mesocycle && l.week === week);
+  const logs = getLogs();
+  let entry = findTodayEntry(logs, exId);
   if (!entry) {
-    entry = { id: Date.now()+'_'+Math.random().toString(36).slice(2), exId, date: today, mesocycle: s.mesocycle, week: week, day: appState.currentDay || todayKey(), sets: [] };
+    const s = getState();
+    entry = { id: newUid(), exId, date: localISO(), mesocycle: s.mesocycle, week: computeCurrentWeek(s), day: appState.currentDay || todayKey(), sets: [] };
     logs.push(entry);
   }
-  const setObj = { n: entry.sets.length + 1, weight: parseFloat(weight) || 0, reps: parseInt(reps) || 0 };
+  const setObj = { uid: newUid(), n: entry.sets.length + 1, weight: parseFloat(weight) || 0, reps: parseInt(reps, 10) || 0 };
   entry.sets.push(setObj);
   saveLogs(logs);
-  pushToSheet(exId, entry, setObj);
+  queueUpsert([setObj.uid]);
+  return setObj;
 }
 
 function deleteSet(exId, setIndex) {
-  const today = new Date().toISOString().slice(0,10);
-  const s = getState();
-  const week = computeCurrentWeek(s);
-  let logs = getLogs();
-  const entry = logs.find(l => l.exId === exId && l.date === today && l.mesocycle === s.mesocycle && l.week === week);
-  if (!entry) return;
-  entry.sets.splice(setIndex, 1);
-  entry.sets.forEach((s,i) => s.n = i+1);
+  const logs = getLogs();
+  const entry = findTodayEntry(logs, exId);
+  if (!entry || !entry.sets[setIndex]) return;
+  const [removed] = entry.sets.splice(setIndex, 1);
+  entry.sets.forEach((s, i) => s.n = i + 1);
   saveLogs(logs);
+  queueDelete([removed.uid]);
+  const renumbered = entry.sets.slice(setIndex).map(s => s.uid);
+  if (renumbered.length) queueUpsert(renumbered);
 }
 
 // ══════════════════════════════════════════════
@@ -755,44 +1012,56 @@ function playDoneSound() {
 }
 
 // ══════════════════════════════════════════════
-// TIMER
+// TIMER (basado en hora de fin, no en contar ticks)
 // ══════════════════════════════════════════════
 const CIRC = 2 * Math.PI * 96;
 const timerRing = document.getElementById('timer-ring');
+let timerState = { id: null, total: 0, endAt: 0, active: false };
+let wakeLock = null;
+
+async function requestWakeLock() {
+  try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch {}
+}
+function releaseWakeLock() {
+  try { if (wakeLock) wakeLock.release(); } catch {}
+  wakeLock = null;
+}
 
 function startTimer(seconds, exName, setInfo) {
   if (seconds <= 0) return;
   if (timerState.id) clearInterval(timerState.id);
-
-  timerState = { total: seconds, remaining: seconds, active: true };
+  timerState = { id: null, total: seconds, endAt: Date.now() + seconds * 1000, active: true };
   document.getElementById('timer-ex-name').textContent = exName;
   document.getElementById('timer-set-info').textContent = setInfo;
   document.getElementById('timer-overlay').classList.add('active');
   timerRing.style.strokeDasharray = CIRC;
   timerRing.classList.remove('done-flash');
-
-  updateTimerDisplay();
-
-  timerState.id = setInterval(() => {
-    timerState.remaining--;
-    updateTimerDisplay();
-    if (timerState.remaining <= 0) {
-      clearInterval(timerState.id);
-      timerState.active = false;
-      playDoneSound();
-      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-      timerRing.classList.add('done-flash');
-      setTimeout(() => hideTimer(), 1200);
-    }
-  }, 1000);
+  requestWakeLock(); // mantiene la pantalla encendida durante el descanso
+  tickTimer();
+  timerState.id = setInterval(tickTimer, 250);
 }
 
-function updateTimerDisplay() {
-  const r = timerState.remaining;
+function timerRemaining() { return Math.max(0, Math.ceil((timerState.endAt - Date.now()) / 1000)); }
+
+function tickTimer() {
+  if (!timerState.active) return;
+  const r = timerRemaining();
+  updateTimerDisplay(r);
+  if (r <= 0) {
+    clearInterval(timerState.id);
+    timerState.active = false;
+    playDoneSound();
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    timerRing.classList.add('done-flash');
+    setTimeout(hideTimer, 1200);
+  }
+}
+
+function updateTimerDisplay(r) {
   const m = Math.floor(r / 60);
   const s = r % 60;
   document.getElementById('timer-display').textContent = `${m}:${String(s).padStart(2,'0')}`;
-  const ratio = r / timerState.total;
+  const ratio = timerState.total ? r / timerState.total : 0;
   timerRing.style.strokeDashoffset = CIRC * (1 - ratio);
 }
 
@@ -801,10 +1070,16 @@ function skipTimer() {
   timerState.active = false;
   hideTimer();
 }
-
 function hideTimer() {
   document.getElementById('timer-overlay').classList.remove('active');
+  releaseWakeLock();
 }
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) return;
+  if (timerState.active) { tickTimer(); requestWakeLock(); }
+  flushSync();
+});
 
 // ══════════════════════════════════════════════
 // SCREEN NAVIGATION
@@ -814,7 +1089,6 @@ function showScreen(id) {
   document.getElementById('screen-' + id).classList.add('active');
   window.scrollTo(0,0);
 }
-
 function goHome() { showScreen('home'); renderHome(); }
 function goSession() { showScreen('session'); renderSession(appState.currentDay); }
 function goLog() { showScreen('log'); renderLog(appState.currentExId); }
@@ -822,6 +1096,25 @@ function goLog() { showScreen('log'); renderLog(appState.currentExId); }
 // ══════════════════════════════════════════════
 // HOME SCREEN
 // ══════════════════════════════════════════════
+function renderAlerts(s) {
+  const el = document.getElementById('home-alerts');
+  let html = '';
+  if (isMesocycleOverdue(s)) {
+    html += `<div class="alert warn">Mesociclo completado — archívalo desde Ajustes para empezar el siguiente.</div>`;
+  }
+  const pend = pendingCount();
+  if (pend && SHEET_WEBHOOK_URL) {
+    html += `<div class="alert warn"><span>⏳ ${pend} cambio${pend > 1 ? 's' : ''} sin enviar a la Google Sheet.</span><button class="btn-outline" onclick="flushSync()">Reintentar</button></div>`;
+  }
+  const hasData = getLogs().some(l => l.sets && l.sets.length);
+  const lb = localStorage.getItem('last_backup');
+  const days = lb ? Math.floor((Date.now() - new Date(lb).getTime()) / 86400000) : null;
+  if (hasData && (days === null || days >= 7)) {
+    html += `<div class="alert"><span>💾 ${days === null ? 'Aún no has descargado un respaldo completo.' : `Último respaldo completo hace ${days} días.`}</span><button class="btn-outline" onclick="exportBackupJSON()">Descargar</button></div>`;
+  }
+  el.innerHTML = html;
+}
+
 function renderHome() {
   const s = initState();
   const dayKey = todayKey();
@@ -830,62 +1123,56 @@ function renderHome() {
   document.getElementById('home-meso-badge').textContent = `Mesociclo ${s.mesocycle}`;
   document.getElementById('home-week-badge').textContent = `Semana ${week} / 8`;
 
-  const banner = document.getElementById('meso-overdue-banner');
-  banner.innerHTML = isMesocycleOverdue(s)
-    ? `<div class="overdue-banner">Mesociclo completado — archívalo desde Ajustes para empezar el siguiente.</div>`
-    : '';
+  renderAlerts(s);
 
-  // Week grid
   const grid = document.getElementById('week-grid');
   grid.innerHTML = '';
   for (let w = 1; w <= 8; w++) {
     const dot = document.createElement('div');
     dot.className = 'week-dot' + (w < week ? ' done' : '') + (w === week ? ' active' : '');
     dot.textContent = w;
-    dot.title = `Semana ${w}`;
     grid.appendChild(dot);
   }
 
-  // All sessions picker
   renderAllSessions();
 
-  // Session area
   const area = document.getElementById('home-session-area');
   if (!dayKey) {
     area.innerHTML = `<div class="rest-day"><div class="big-icon">🛌</div><h2>Día de descanso</h2><p>Hoy es domingo — descansa y recupera.</p></div>`;
   } else {
     const session = SESSIONS[dayKey];
     const totalEx = session.exercises.length;
-    const logsToday = session.exercises.filter(e => getTodayLogSets(e.id).length > 0).length;
-
+    const started = session.exercises.filter(e => getTodayLogSets(e.id).length > 0).length;
+    const completed = session.exercises.filter(e => getTodayLogSets(e.id).length >= e.sets).length;
     area.innerHTML = `
       <div class="session-card">
         <div class="day-tag">${session.dayName}</div>
         <h2>${session.name}</h2>
-        <p class="ex-count">${totalEx} ejercicios${logsToday > 0 ? ` · ${logsToday} completados` : ''}</p>
+        <p class="ex-count">${totalEx} ejercicios${started > 0 ? ` · ${completed}/${totalEx} completados` : ''}</p>
         <button class="btn btn-primary" onclick="startSession('${dayKey}')">
-          ${logsToday > 0 ? '▶ Continuar sesión' : '▶ Iniciar sesión'}
+          ${started > 0 ? '▶ Continuar sesión' : '▶ Iniciar sesión'}
         </button>
       </div>`;
   }
 }
 
 function renderAllSessions() {
-  const todayKey = DAY_MAP[new Date().getDay()];
+  const tk = todayKey();
   const area = document.getElementById('all-sessions-area');
   const dayOrder = ['lunes','martes','miercoles','jueves','viernes','sabado'];
   const dayShort = { lunes:'Lun', martes:'Mar', miercoles:'Mié', jueves:'Jue', viernes:'Vie', sabado:'Sáb' };
   let html = '';
   dayOrder.forEach(key => {
     const session = SESSIONS[key];
-    const isToday = key === todayKey;
-    const logsToday = session.exercises.filter(e => getTodayLogSets(e.id).length > 0).length;
+    const isToday = key === tk;
+    const completed = session.exercises.filter(e => getTodayLogSets(e.id).length >= e.sets).length;
+    const started = session.exercises.filter(e => getTodayLogSets(e.id).length > 0).length;
     const totalEx = session.exercises.length;
     html += `<div class="session-pick-item${isToday ? ' today' : ''}" onclick="startSession('${key}')">
       <div class="session-pick-day${isToday ? ' today' : ''}">${dayShort[key]}</div>
       <div class="session-pick-info">
         <div class="session-pick-name">${session.name}</div>
-        ${logsToday > 0 ? `<div class="session-pick-done">✓ ${logsToday}/${totalEx} ejercicios hoy</div>` : ''}
+        ${started > 0 ? `<div class="session-pick-done">✓ ${completed}/${totalEx} ejercicios completados hoy</div>` : ''}
       </div>
       ${isToday ? '<span style="font-size:11px;font-weight:700;color:var(--primary-light);margin-right:4px;">HOY</span>' : ''}
       <div class="session-pick-chevron">›</div>
@@ -903,13 +1190,19 @@ function startSession(dayKey) {
 // ══════════════════════════════════════════════
 // SESSION SCREEN
 // ══════════════════════════════════════════════
+function loggedInfo(ex) {
+  const sets = getTodayLogSets(ex.id);
+  if (!sets.length) return '';
+  const prev = getPrevEntry(ex.id);
+  const c = prev ? cmpSessions(sets, prev.sets, ex) : null;
+  return `<div class="ex-logged-info">✓ ${sets.length} serie${sets.length>1?'s':''} registrada${sets.length>1?'s':''}${c !== null ? ` · vs última ${cmpTag(c)}` : ''}</div>`;
+}
+
 function renderSession(dayKey) {
   const session = SESSIONS[dayKey];
   document.getElementById('session-header-title').textContent = `${session.dayName} — ${session.name}`;
-
   const body = document.getElementById('session-body');
   body.innerHTML = '';
-
   const exercises = session.exercises;
   const rendered = new Set();
 
@@ -917,54 +1210,44 @@ function renderSession(dayKey) {
     if (rendered.has(ex.id)) return;
 
     if (ex.group) {
-      // Find all exercises in this group
       const groupExs = exercises.filter(e => e.group === ex.group);
-      if (rendered.has(groupExs[0].id)) return;
       groupExs.forEach(ge => rendered.add(ge.id));
 
       const card = document.createElement('div');
       card.className = 'group-card';
-
       const hdr = document.createElement('div');
       hdr.className = `group-header ${ex.groupType}`;
       hdr.innerHTML = `<span>${ex.groupType === 'abs' ? '🔥' : '🦵'} ${ex.groupLabel}</span>`;
       card.appendChild(hdr);
 
       groupExs.forEach(ge => {
-        const sets = getTodayLogSets(ge.id);
-        const done = sets.length >= ge.sets;
+        const done = getTodayLogSets(ge.id).length >= ge.sets;
         const item = document.createElement('div');
         item.className = 'group-ex-item' + (done ? ' done' : '');
         item.onclick = () => openExercise(ge.id);
-        const roleClass = ge.groupRole === 'calf' ? 'calf' : ge.groupRole;
         item.innerHTML = `
-          <div class="grp-label ${roleClass}">${ge.groupRole}</div>
+          <div class="grp-label ${ge.groupRole}">${ge.groupRole}</div>
           <div class="ex-details">
             <div class="ex-name">${ge.name}</div>
             <div class="ex-presc">${ge.presc}</div>
-            ${sets.length ? `<div class="ex-logged-info">✓ ${sets.length} serie${sets.length>1?'s':''} registrada${sets.length>1?'s':''}</div>` : ''}
+            ${loggedInfo(ge)}
           </div>
           <div class="ex-chevron">›</div>`;
         card.appendChild(item);
       });
-
       body.appendChild(card);
     } else {
       rendered.add(ex.id);
-      const sets = getTodayLogSets(ex.id);
-      const done = sets.length >= ex.sets;
+      const done = getTodayLogSets(ex.id).length >= ex.sets;
       const item = document.createElement('div');
       item.className = 'ex-item' + (done ? ' done' : '');
       item.onclick = () => openExercise(ex.id);
-
-      // Number — show index among non-group items
-      const num = idx + 1;
       item.innerHTML = `
-        <div class="ex-num ${done ? 'done' : ''}">${done ? '✓' : num}</div>
+        <div class="ex-num ${done ? 'done' : ''}">${done ? '✓' : idx + 1}</div>
         <div class="ex-details">
           <div class="ex-name">${ex.name}${ex.note ? ` <span class="tag${ex.note.includes('Activ') ? ' activation' : ''}" style="margin-left:6px;font-size:10px;">${ex.note}</span>` : ''}</div>
           <div class="ex-presc">${ex.presc}</div>
-          ${sets.length ? `<div class="ex-logged-info">✓ ${sets.length} serie${sets.length>1?'s':''} registrada${sets.length>1?'s':''}</div>` : ''}
+          ${loggedInfo(ex)}
         </div>
         <div class="ex-chevron">›</div>`;
       body.appendChild(item);
@@ -984,58 +1267,53 @@ function openExercise(exId) {
 function renderLog(exId) {
   const ex = exById(exId);
   if (!ex) return;
-
   document.getElementById('log-header-title').textContent = ex.name;
 
   const body = document.getElementById('log-body');
   const todaySets = getTodayLogSets(exId);
-  const lastSets = getLastSessionSets(exId).filter(s => {
-    // exclude today from "last"
-    const today = new Date().toISOString().slice(0,10);
-    const logs = getExLogs(exId);
-    const nonToday = logs.filter(l => l.date !== today);
-    return nonToday.length > 0;
-  });
-  // Re-get properly
-  const today = new Date().toISOString().slice(0,10);
-  const allLogs = getExLogs(exId);
-  const prevLogs = allLogs.filter(l => l.date < today);
-  const lastEntry = prevLogs.length ? prevLogs[prevLogs.length - 1] : null;
+  const lastEntry = getPrevEntry(exId);
   const lastRefSets = lastEntry ? lastEntry.sets : [];
+  const unit = unitOf(ex);
 
-  const restLabel = ex.rest > 0 ? `${ex.rest} seg descanso` : (ex.rest === 0 ? 'Sin descanso programado' : '—');
+  let restLabel;
+  if (ex.rest > 0) restLabel = `⏱ ${ex.rest} seg descanso`;
+  else if (ex.rest === 0) restLabel = '⏱ Sin descanso programado';
+  else if (ex.groupRole === 'A') restLabel = '⏱ Biserie: pasa directo al ejercicio B';
+  else restLabel = '';
 
   let html = '';
 
-  // Prescription
   html += `<div class="info-box">
     <div class="lbl">Prescripción</div>
     <div class="val">${ex.presc}</div>
-    ${ex.rest != null ? `<div class="sub">⏱ ${restLabel}</div>` : ''}
+    ${restLabel ? `<div class="sub">${restLabel}</div>` : ''}
     ${ex.note ? `<div class="sub" style="margin-top:4px;color:var(--warn);">💡 ${ex.note}</div>` : ''}
   </div>`;
 
-  // Last session reference
+  // Doble progresión: solo con rangos ascendentes claros (p.ej. 8-10).
+  const rr = repRange(ex);
+  if (rr && lastRefSets.length >= ex.sets && lastRefSets.slice(0, ex.sets).every(s => s.reps >= rr.hi)) {
+    html += `<div class="hint">🎯 La última vez llegaste a ${rr.hi} ${unit} en todas las series → toca subir carga.</div>`;
+  }
+
   html += `<div class="last-ref">
-    <div class="lbl">Última sesión</div>
-    <div class="ref-chips" id="ref-chips-area">`;
+    <div class="lbl">Última sesión${lastEntry ? ` · ${fmtDate(lastEntry.date)} (M${lastEntry.mesocycle ?? '?'}·S${lastEntry.week ?? '?'})` : ''}</div>
+    <div class="ref-chips">`;
   if (lastRefSets.length) {
     lastRefSets.forEach(s => {
-      html += `<div class="ref-chip">S${s.n}: ${s.weight > 0 ? s.weight + 'kg' : '—'} × ${s.reps}</div>`;
+      html += `<div class="ref-chip">S${s.n}: ${s.weight > 0 ? s.weight + 'kg' : 'PC'} × ${s.reps}${unit === 'seg' ? 's' : ''}</div>`;
     });
   } else {
     html += `<span class="ref-empty">Sin datos previos</span>`;
   }
   html += `</div></div>`;
 
-  // Logged sets today
-  const repsUnit = ex.unit === 'seg' ? 'seg' : 'reps';
-  html += `<div class="sets-area" id="sets-area">`;
+  html += `<div class="sets-area">`;
   if (todaySets.length) {
     todaySets.forEach((s, i) => {
       html += `<div class="set-row">
         <div class="set-badge">Serie ${s.n}</div>
-        <div class="set-info">${s.weight > 0 ? s.weight + ' kg' : 'Peso corporal'} × ${s.reps} ${repsUnit}</div>
+        <div class="set-info">${s.weight > 0 ? s.weight + ' kg' : 'Peso corporal'} × ${s.reps} ${unit}${cmpTag(cmpSets(s, lastRefSets[i], ex))}</div>
         <button class="set-del" onclick="delSet('${exId}', ${i})">✕</button>
       </div>`;
     });
@@ -1044,19 +1322,23 @@ function renderLog(exId) {
   }
   html += `</div>`;
 
-  // Input form
+  // Prefill con la MISMA serie de la sesión anterior (antes estaba desplazada una posición).
   const nextSetNum = todaySets.length + 1;
-  const isBodyweight = ex.presc.toLowerCase().includes('fallo') && !ex.presc.includes('kg');
+  const ref = lastRefSets[nextSetNum - 1] || lastRefSets[lastRefSets.length - 1] || null;
+  const prefWeight = ref && ref.weight > 0 ? ref.weight : '';
+  const repsPlaceholder = ref ? ref.reps : 0;
+  const formTitle = nextSetNum <= ex.sets ? `➕ Serie ${nextSetNum} de ${ex.sets}` : `➕ Serie ${nextSetNum} (extra)`;
+
   html += `<div class="log-form">
-    <div class="form-title">➕ Serie ${nextSetNum} de ${ex.sets}</div>
+    <div class="form-title">${formTitle}${ref ? ` · a batir: ${fmtSet(ref, ex)}` : ''}</div>
     <div class="input-row">
       <div class="input-grp">
         <label>Peso (kg)</label>
-        <input type="number" id="inp-weight" min="0" step="0.5" placeholder="0" inputmode="decimal" value="${lastRefSets[nextSetNum-2]?.weight || lastRefSets[lastRefSets.length-1]?.weight || ''}">
+        <input type="number" id="inp-weight" min="0" step="0.5" placeholder="0" inputmode="decimal" value="${prefWeight}">
       </div>
       <div class="input-grp">
-        <label>${ex.unit === 'seg' ? 'Segundos' : 'Reps'}</label>
-        <input type="number" id="inp-reps" min="0" step="1" placeholder="0" inputmode="numeric" value="">
+        <label>${unit === 'seg' ? 'Segundos' : 'Reps'}</label>
+        <input type="number" id="inp-reps" min="0" step="1" placeholder="${repsPlaceholder}" inputmode="numeric" value="">
       </div>
     </div>
     <button class="btn btn-accent" onclick="logSet('${exId}')">✓ Registrar serie</button>
@@ -1064,7 +1346,6 @@ function renderLog(exId) {
 
   body.innerHTML = html;
 
-  // Focus reps if weight prefilled
   setTimeout(() => {
     const wpEl = document.getElementById('inp-weight');
     const rpEl = document.getElementById('inp-reps');
@@ -1075,32 +1356,27 @@ function renderLog(exId) {
 
 function logSet(exId) {
   const weight = document.getElementById('inp-weight').value;
-  const reps = document.getElementById('inp-reps').value;
-
-  if (reps === '' || reps === null) {
-    document.getElementById('inp-reps').style.borderColor = 'var(--danger)';
-    setTimeout(() => document.getElementById('inp-reps').style.borderColor = '', 1000);
+  const repsEl = document.getElementById('inp-reps');
+  const reps = repsEl.value;
+  if (reps === '' || reps === null || parseInt(reps, 10) < 0) {
+    repsEl.style.borderColor = 'var(--danger)';
+    setTimeout(() => repsEl.style.borderColor = '', 1000);
     return;
   }
 
-  saveSet(exId, weight, reps);
+  const setObj = saveSet(exId, weight, reps);
   playBeep(660, 0.1);
 
   const ex = exById(exId);
-  const todaySets = getTodayLogSets(exId);
-  const justLogged = todaySets[todaySets.length - 1];
-
-  // Start timer
   if (ex.rest > 0) {
-    const setInfo = `Serie ${justLogged.n} — ${justLogged.weight > 0 ? justLogged.weight+'kg' : 'PC'} × ${justLogged.reps} reps`;
+    const setInfo = `Serie ${setObj.n} — ${setObj.weight > 0 ? setObj.weight + 'kg' : 'PC'} × ${setObj.reps} ${unitOf(ex)}`;
     startTimer(ex.rest, ex.name, setInfo);
   }
-
   renderLog(exId);
-  // Update session screen data in background
 }
 
 function delSet(exId, idx) {
+  if (!confirm('¿Borrar esta serie?')) return;
   deleteSet(exId, idx);
   renderLog(exId);
 }
@@ -1109,18 +1385,44 @@ function delSet(exId, idx) {
 // PROGRESS SCREEN
 // ══════════════════════════════════════════════
 function viewProgress() {
-  const exId = appState.currentExId;
-  appState.prevScreen = 'log';
   showScreen('progress');
-  renderProgress(exId);
+  renderProgress(appState.currentExId);
+}
+
+function lineChart(pts, decimals) {
+  if (pts.length < 2) return `<div class="ref-empty" style="padding:6px 0">Necesitas al menos 2 sesiones para ver la tendencia.</div>`;
+  const W = 340, H = 160, pl = 38, pr = 12, pt = 12, pb = 24;
+  const ys = pts.map(p => p.y);
+  let min = Math.min(...ys), max = Math.max(...ys);
+  if (max === min) { max += 1; min -= 1; }
+  const pad = (max - min) * 0.12; min -= pad; max += pad;
+  const x = i => pl + i * (W - pl - pr) / (pts.length - 1);
+  const y = v => pt + (H - pt - pb) * (1 - (v - min) / (max - min));
+  let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img">`;
+  for (let k = 0; k <= 3; k++) {
+    const v = min + (max - min) * k / 3;
+    const yy = y(v).toFixed(1);
+    svg += `<line x1="${pl}" x2="${W - pr}" y1="${yy}" y2="${yy}" stroke="#2c2c38" stroke-width="1"/>`;
+    svg += `<text x="${pl - 6}" y="${yy}" fill="#94a3b8" font-size="10" text-anchor="end" dominant-baseline="middle">${v.toFixed(decimals)}</text>`;
+  }
+  const path = pts.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(p.y).toFixed(1)}`).join(' ');
+  svg += `<path d="${path}" fill="none" stroke="#818cf8" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+  pts.forEach((p, i) => {
+    const c = p.newMeso ? '#f59e0b' : '#818cf8';
+    svg += `<circle cx="${x(i).toFixed(1)}" cy="${y(p.y).toFixed(1)}" r="3.5" fill="${c}"/>`;
+  });
+  svg += `<text x="${pl}" y="${H - 6}" fill="#94a3b8" font-size="10">${pts[0].label}</text>`;
+  svg += `<text x="${W - pr}" y="${H - 6}" fill="#94a3b8" font-size="10" text-anchor="end">${pts[pts.length - 1].label}</text>`;
+  svg += `</svg>`;
+  return svg;
 }
 
 function renderProgress(exId) {
   const ex = exById(exId);
   if (!ex) return;
-
   const body = document.getElementById('progress-body');
   const logs = getExLogs(exId);
+  const unit = unitOf(ex);
 
   let html = `<div>
     <div class="prog-ex-header">${ex.name}</div>
@@ -1129,27 +1431,49 @@ function renderProgress(exId) {
 
   if (!logs.length) {
     html += `<div class="empty-prog"><div class="eicon">📊</div>No hay datos registrados aún.</div>`;
-  } else {
-    const repsUnit = ex.unit === 'seg' ? 'Seg' : 'Reps';
-    html += `<div class="table-wrap"><table>
-      <thead><tr>
-        <th>Fecha</th><th>Sem.</th><th>Serie</th><th>Peso</th><th>${repsUnit}</th>
-      </tr></thead>
-      <tbody>`;
-    logs.forEach(entry => {
-      if (!entry.sets || !entry.sets.length) return;
-      entry.sets.forEach((s, i) => {
-        html += `<tr>
-          ${i === 0 ? `<td rowspan="${entry.sets.length}" style="vertical-align:top">${fmtDate(entry.date)}</td>` : ''}
-          ${i === 0 ? `<td rowspan="${entry.sets.length}" style="vertical-align:top">S${entry.week || '?'}</td>` : ''}
-          <td>Serie ${s.n}</td>
-          <td>${s.weight > 0 ? s.weight + ' kg' : 'PC'}</td>
-          <td>${s.reps}</td>
-        </tr>`;
-      });
-    });
-    html += `</tbody></table></div>`;
+    body.innerHTML = html;
+    return;
   }
+
+  const weighted = logs.some(l => isWeighted(l.sets));
+  // Si el historial mezcla sesiones con carga y a peso corporal, el gráfico usa solo las del tipo mayoritario.
+  const chartLogs = logs.filter(l => isWeighted(l.sets) === weighted);
+  const pts = chartLogs.map((l, i) => ({
+    label: fmtDate(l.date),
+    y: bestScore(l.sets),
+    newMeso: i > 0 && l.mesocycle !== chartLogs[i - 1].mesocycle
+  }));
+
+  html += `<div class="chart-card">
+    <div class="lbl">${weighted ? 'Mejor serie · 1RM estimado (kg)' : `Mejor serie (${unit})`}</div>
+    ${lineChart(pts, 0)}
+    ${pts.some(p => p.newMeso) ? `<div style="font-size:11px;color:var(--text-muted);margin-top:6px;">● naranja = primera sesión de un nuevo mesociclo (la prescripción puede haber cambiado).</div>` : ''}
+  </div>`;
+
+  html += `<div class="table-wrap"><table>
+    <thead><tr><th>Fecha</th><th>M·S</th><th>Series</th><th>${weighted ? '1RM est.' : 'Mejor'}</th><th>Δ</th></tr></thead>
+    <tbody>`;
+  const rows = [];
+  logs.forEach((entry, i) => {
+    const score = bestScore(entry.sets);
+    const prev = i > 0 ? logs[i - 1] : null;
+    let delta = '';
+    if (prev && isWeighted(prev.sets) === isWeighted(entry.sets)) {
+      const d = score - bestScore(prev.sets);
+      const cls = Math.abs(d) < 0.5 ? 'eq' : d > 0 ? 'up' : 'down';
+      delta = `<span class="cmp ${cls}" style="margin-left:0">${d > 0 ? '+' : ''}${d.toFixed(1)}</span>`;
+    }
+    rows.push(`<tr>
+      <td>${fmtDate(entry.date)}</td>
+      <td>M${entry.mesocycle ?? '?'}·S${entry.week ?? '?'}</td>
+      <td class="sets-cell">${entry.sets.map(s => fmtSet(s, ex)).join(' · ')}</td>
+      <td>${isWeighted(entry.sets) ? score.toFixed(1) + ' kg' : score + ' ' + unit}</td>
+      <td>${delta}</td>
+    </tr>`);
+  });
+  html += rows.reverse().join('');
+  html += `</tbody></table></div>
+    <div style="font-size:11px;color:var(--text-muted);line-height:1.4;">1RM estimado con Epley: peso × (1 + reps/30). Sirve para comparar sesiones con distinto peso y reps; no es tu 1RM real.</div>`;
 
   body.innerHTML = html;
 }
@@ -1159,23 +1483,20 @@ function renderProgress(exId) {
 // ══════════════════════════════════════════════
 function openSettings() {
   const s = getState();
-  document.getElementById('settings-meso-num').value = s.mesocycle || 9;
-  document.getElementById('settings-start-date').value = s.startDate || new Date().toISOString().slice(0,10);
+  document.getElementById('settings-meso-num').value = s.mesocycle || CURRENT_MESO;
+  document.getElementById('settings-start-date').value = s.startDate || localISO();
   document.getElementById('settings-week-computed').textContent = `Semana calculada: ${computeCurrentWeek(s)} / 8`;
+  refreshSyncUI();
   document.getElementById('settings-modal').classList.add('active');
 }
-
-function closeSettings() {
-  document.getElementById('settings-modal').classList.remove('active');
-}
-
+function closeSettings() { document.getElementById('settings-modal').classList.remove('active'); }
 function closeSettingsOutside(e) {
   if (e.target === document.getElementById('settings-modal')) closeSettings();
 }
 
 function saveSettings() {
   const s = getState();
-  const mNum = parseInt(document.getElementById('settings-meso-num').value);
+  const mNum = parseInt(document.getElementById('settings-meso-num').value, 10);
   const startDate = document.getElementById('settings-start-date').value;
   if (mNum > 0) s.mesocycle = mNum;
   if (startDate) s.startDate = startDate;
@@ -1185,19 +1506,18 @@ function saveSettings() {
 }
 
 function archiveMesocycle() {
-  if (!confirm('¿Archivar el mesociclo actual y comenzar uno nuevo? Los datos quedarán guardados en el historial.')) return;
+  if (!confirm('¿Archivar el mesociclo actual y comenzar uno nuevo? El historial no se borra.')) return;
   const s = getState();
-  // Archive marker
-  let archives = JSON.parse(localStorage.getItem('meso_archives') || '[]');
-  archives.push({ mesocycle: s.mesocycle, archivedAt: new Date().toISOString() });
+  const archives = getArchives();
+  archives.push({ mesocycle: s.mesocycle, startDate: s.startDate, archivedAt: new Date().toISOString() });
   localStorage.setItem('meso_archives', JSON.stringify(archives));
-  // Bump mesocycle, reset start date
-  s.mesocycle = (s.mesocycle || 9) + 1;
-  s.startDate = new Date().toISOString().slice(0,10);
+  s.mesocycle = (s.mesocycle || CURRENT_MESO) + 1;
+  s.startDate = localISO();
   setState(s);
   closeSettings();
   renderHome();
-  alert(`Mesociclo ${s.mesocycle - 1} archivado. Bienvenido al Mesociclo ${s.mesocycle}!`);
+  alert(`Mesociclo ${s.mesocycle - 1} archivado. Empieza el Mesociclo ${s.mesocycle}.` +
+    (s.mesocycle > CURRENT_MESO ? `\n\nRecuerda: el programa de ejercicios sigue siendo el del mesociclo ${CURRENT_MESO} hasta que lo cambies en el código.` : ''));
 }
 
 // ══════════════════════════════════════════════
@@ -1205,16 +1525,20 @@ function archiveMesocycle() {
 // ══════════════════════════════════════════════
 function init() {
   initState();
+  migrateData();
+
+  // Pide al navegador que no borre los datos por falta de espacio / inactividad.
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); } catch {}
+
   showScreen('home');
   renderHome();
 
-  // Unlock audio on first user interaction
-  document.addEventListener('touchstart', () => {
-    try { getAudioCtx().resume(); } catch(e) {}
-  }, { once: true });
-  document.addEventListener('click', () => {
-    try { getAudioCtx().resume(); } catch(e) {}
-  }, { once: true });
+  const unlock = () => { try { getAudioCtx().resume(); } catch(e) {} };
+  document.addEventListener('touchstart', unlock, { once: true });
+  document.addEventListener('click', unlock, { once: true });
+
+  window.addEventListener('online', flushSync);
+  flushSync();
 }
 
 init();
