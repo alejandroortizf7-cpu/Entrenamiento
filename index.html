@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Entreno">
+  <meta name="theme-color" content="#0c0c0e">
   <title>Entrenamiento</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900&display=swap" rel="stylesheet">
   <style>
@@ -160,6 +164,7 @@
     .grp-label.A { background: rgba(124,58,237,.3); color: #c4b5fd; }
     .grp-label.B { background: rgba(37,99,235,.3); color: #93c5fd; }
     .grp-label.calf { background: rgba(8,145,178,.3); color: #67e8f9; }
+    .grp-label.abs { background: rgba(124,58,237,.3); color: #c4b5fd; }
 
     /* comparación vs sesión anterior */
     .cmp { font-size: 12px; font-weight: 800; margin-left: 6px; }
@@ -414,7 +419,7 @@
 
     <div class="modal-section">
       <h4>Archivado</h4>
-      <p class="desc">Cierra el mesociclo actual y empieza el siguiente (número +1, fecha de inicio hoy). El historial no se borra. Ojo: el programa de ejercicios se cambia en el código, no aquí.</p>
+      <p class="desc">Cierra el mesociclo actual y empieza el siguiente (número +1, fecha de inicio hoy). El historial no se borra. Si el programa del siguiente mesociclo ya está cargado en la app, cambia solo.</p>
       <button class="btn btn-danger" onclick="archiveMesocycle()">Archivar mesociclo y empezar siguiente</button>
     </div>
 
@@ -429,8 +434,6 @@
 // ══════════════════════════════════════════════
 // CONFIGURACIÓN
 // ══════════════════════════════════════════════
-// Número del mesociclo al que corresponde el programa de SESSIONS de abajo.
-const CURRENT_MESO = 10;
 
 // URL del Apps Script (Implementar → Gestionar implementaciones).
 const SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwBRJ5oVMPHlM45GgpPkdn7NPny2MYiwDbCTAFOHseE_9BnayrRANRb-2vUdReqJw9_KQ/exec';
@@ -464,11 +467,20 @@ const ARCHIVED_EXERCISE_NAMES = {
   sab_cal_1:'Elevación de talón',
 };
 
-// `hist`: IDs de mesociclos anteriores que son EL MISMO ejercicio. Así "Última sesión",
-// la comparación y el gráfico de progresión continúan entre mesociclos.
-// Al pasar al mesociclo 11: copia estos nombres a ARCHIVED_EXERCISE_NAMES, cambia los
-// ids a m11_..., pon en `hist` el id m10_ equivalente (y los anteriores) y sube CURRENT_MESO.
-const SESSIONS = {
+// ══════════════════════════════════════════════
+// PROGRAMAS POR MESOCICLO
+// ══════════════════════════════════════════════
+// Cada mesociclo tiene su programa. La app usa el del número de mesociclo actual
+// (Ajustes). Al "Archivar", pasa al siguiente número y, si ese programa existe, lo usa.
+//
+// Para un mesociclo nuevo: añade PROGRAMS[N] con ids nuevos (mN_...). NO borres los
+// anteriores: los necesita el historial.
+//
+// Continuidad del historial ("Última sesión", ▲▼, gráfico): automática para el mismo
+// ejercicio el mismo día de la semana (se compara el nombre sin lo que va entre paréntesis,
+// sin tildes ni mayúsculas). Para renombrados o cambios de día, usa `hist:[ids]`.
+const PROGRAMS = {
+  10: {
   lunes: {
     name: 'JALÓN',
     dayName: 'Lunes',
@@ -552,7 +564,107 @@ const SESSIONS = {
       { id:'m10_sab_cal_1', hist:['sab_cal_1'], name:'Elevación de talón', presc:'3×10-12', sets:3, rest:90, group:'m10_sab_cal', groupType:'pantorrilla', groupLabel:'Pantorrilla', groupRole:'calf' },
     ]
   }
+},
+
+  11: {
+  lunes: {
+    name: 'JALÓN',
+    dayName: 'Lunes',
+    exercises: [
+      { id:'m11_lun_1', name:'Jalón al pecho agarre prono', presc:'2×10-8', sets:2, rest:120, hist:['lun_2'] },
+      { id:'m11_lun_2', name:'Remo en T agarre prono pecho apoyado', presc:'2×8-10', sets:2, rest:120 },
+      { id:'m11_lun_3', name:'Remo agarre neutro en máquina', presc:'2×8-10', sets:2, rest:120 },
+      { id:'m11_lun_4', name:'Jalón a 1 mano agarre neutro', presc:'2×10-8', sets:2, rest:120 },
+      { id:'m11_lun_5', name:'Curl bayesian', presc:'3×10-8', sets:3, rest:120 },
+      { id:'m11_lun_6', name:'Peck deck invertido', presc:'1×10-12', sets:1, rest:90 },
+      { id:'m11_lun_7', name:'Curl predicador unilateral (pesado)', presc:'3×8-10', sets:3, rest:120 },
+      { id:'m11_lun_abs', name:'Crunch en polea con cuerda (pesado)', presc:'3×12-10', sets:3, rest:120, group:'m11_lun_abs', groupType:'abs', groupLabel:'ABS', groupRole:'abs' },
+    ]
+  },
+  martes: {
+    name: 'PIERNA',
+    dayName: 'Martes',
+    exercises: [
+      { id:'m11_mar_1', name:'Aductor de cadera', presc:'3×10-12', sets:3, rest:120 },
+      { id:'m11_mar_2', name:'Curl femoral sentado', presc:'3×10-8', sets:3, rest:120 },
+      { id:'m11_mar_3', name:'Sentadilla hack (control)', presc:'2×12-10', sets:2, rest:120 },
+      { id:'m11_mar_4', name:'Puentes con barra o máquina', presc:'3×8-10', sets:3, rest:120 },
+      { id:'m11_mar_5', name:'Extensión de cuádriceps (pesadas)', presc:'3×12-10', sets:3, rest:120 },
+      { id:'m11_mar_6', name:'Femoral acostado', presc:'2×8-10', sets:2, rest:120 },
+      { id:'m11_mar_cal', name:'Elevación de talón', presc:'3×12', sets:3, rest:120, group:'m11_mar_cal', groupType:'pantorrilla', groupLabel:'Pantorrilla', groupRole:'calf' },
+    ]
+  },
+  miercoles: {
+    name: 'EMPUJE',
+    dayName: 'Miércoles',
+    exercises: [
+      { id:'m11_mie_1', name:'Press inclinado con mancuernas', presc:'1×8 + 1×12-10 (back off)', sets:2, rest:120 },
+      { id:'m11_mie_2', name:'Peck deck', presc:'2×10-12', sets:2, rest:120 },
+      { id:'m11_mie_3', name:'Vuelos laterales con mancuerna', presc:'3×10-12', sets:3, rest:90, hist:['m10_sab_4','sab_5'] },
+      { id:'m11_mie_4', name:'Press horizontal en máquina', presc:'3×10-8', sets:3, rest:120 },
+      { id:'m11_mie_5', name:'Vuelos laterales en polea unilateral', presc:'2×8-10', sets:2, rest:120 },
+      { id:'m11_mie_6', name:'Copa en polea media con cuerda', presc:'2×8-10', sets:2, rest:90 },
+      { id:'m11_mie_7', name:'Extensión 1 mano', presc:'3×12-10', sets:3, rest:90 },
+      { id:'m11_mie_abs', name:'Crunch en poleas', presc:'3×15', sets:3, rest:120, group:'m11_mie_abs', groupType:'abs', groupLabel:'ABS', groupRole:'abs' },
+    ]
+  },
+  jueves: {
+    name: 'JALÓN',
+    dayName: 'Jueves',
+    exercises: [
+      { id:'m11_jue_1', name:'Jalón al pecho con triángulo', presc:'2×8-10', sets:2, rest:120 },
+      { id:'m11_jue_2', name:'Remo agarre prono en máquina', presc:'2×8-10', sets:2, rest:120 },
+      { id:'m11_jue_3', name:'Curl con barra recta en polea', presc:'3×8-10', sets:3, rest:120 },
+      { id:'m11_jue_4', name:'Pull over con soga', presc:'2×12-10', sets:2, rest:120 },
+      { id:'m11_jue_5', name:'Predicador a 1 mano', presc:'2×10-12', sets:2, rest:120 },
+      { id:'m11_jue_6', name:'Martillos con mancuerna', presc:'2×10-8', sets:2, rest:120 },
+      { id:'m11_jue_cal', name:'Elevación de talón', presc:'3×10-12', sets:3, rest:100, group:'m11_jue_cal', groupType:'pantorrilla', groupLabel:'Pantorrilla', groupRole:'calf' },
+    ]
+  },
+  viernes: {
+    name: 'PIERNA',
+    dayName: 'Viernes',
+    exercises: [
+      { id:'m11_vie_1', name:'Femoral acostado (unilateral)', presc:'3×12-10-8', sets:3, rest:120 },
+      { id:'m11_vie_2', name:'Peso muerto rumano', presc:'2×10-12', sets:2, rest:150 },
+      { id:'m11_vie_3', name:'Puentes con barra o máquina', presc:'2×8-10', sets:2, rest:120 },
+      { id:'m11_vie_4', name:'Prensa a 2 piernas', presc:'2×8-10', sets:2, rest:120 },
+      { id:'m11_vie_5', name:'Femoral sentado', presc:'3×10-8', sets:3, rest:120 },
+      { id:'m11_vie_abs', name:'Crunch en polea con cuerda (pesado)', presc:'3×12-10', sets:3, rest:120, group:'m11_vie_abs', groupType:'abs', groupLabel:'ABS', groupRole:'abs' },
+    ]
+  },
+  sabado: {
+    name: 'EMPUJE',
+    dayName: 'Sábado',
+    exercises: [
+      { id:'m11_sab_1', name:'Press de hombro con mancuernas', presc:'2×8-10', sets:2, rest:120 },
+      { id:'m11_sab_2', name:'Press horizontal en máquina', presc:'2×8-10', sets:2, rest:120 },
+      { id:'m11_sab_3', name:'Vuelo en polea baja', presc:'3×10-8', sets:3, rest:120 },
+      { id:'m11_sab_4', name:'Peck deck', presc:'3×10-12', sets:3, rest:120 },
+      { id:'m11_sab_5', name:'Rompe cráneos en banco inclinado', presc:'2×10-12', sets:2, rest:120 },
+      { id:'m11_sab_6', name:'Extensión a 1 mano', presc:'2×8-10', sets:2, rest:210 },
+      { id:'m11_sab_7', name:'Fondos en máquina enfoque tríceps', presc:'2×fallo', sets:2, rest:120 },
+      { id:'m11_sab_cal', name:'Elevación de talón', presc:'3×10-12', sets:3, rest:90, group:'m11_sab_cal', groupType:'pantorrilla', groupLabel:'Pantorrilla', groupRole:'calf' },
+    ]
+  },
+}
 };
+
+const PROGRAM_NUMS = Object.keys(PROGRAMS).map(Number).sort((a,b) => a - b);
+const LATEST_MESO = PROGRAM_NUMS[PROGRAM_NUMS.length - 1];
+let SESSIONS = PROGRAMS[LATEST_MESO];
+let ACTIVE_PROGRAM = LATEST_MESO;
+
+// Programa para un número de mesociclo: el exacto, o el último anterior; si no hay, el más reciente.
+function programFor(meso) {
+  if (PROGRAMS[meso]) return meso;
+  const lower = PROGRAM_NUMS.filter(n => n <= meso);
+  return lower.length ? lower[lower.length - 1] : LATEST_MESO;
+}
+function resolveProgram() {
+  ACTIVE_PROGRAM = programFor(getState().mesocycle || LATEST_MESO);
+  SESSIONS = PROGRAMS[ACTIVE_PROGRAM];
+}
 
 const DAY_MAP = { 0:null, 1:'lunes', 2:'martes', 3:'miercoles', 4:'jueves', 5:'viernes', 6:'sabado' };
 
@@ -589,7 +701,7 @@ function getArchives() { return readJSON('meso_archives', []); }
 function initState() {
   const s = getState();
   let changed = false;
-  if (!s.mesocycle) { s.mesocycle = CURRENT_MESO; changed = true; }
+  if (!s.mesocycle) { s.mesocycle = LATEST_MESO; changed = true; }
   if (!s.startDate) { s.startDate = localISO(); changed = true; }
   if (changed) setState(s);
   return s;
@@ -641,28 +753,65 @@ function fmtDate(iso) {
   return `${d}/${m}/${y.slice(2)}`;
 }
 
+const DAY_PREFIX = { lun:'lunes', mar:'martes', mie:'miercoles', jue:'jueves', vie:'viernes', sab:'sabado' };
+
+// Todos los ejercicios de todos los programas: id -> { ex, day, meso }
+const EX_INDEX = (() => {
+  const idx = {};
+  PROGRAM_NUMS.forEach(n => Object.entries(PROGRAMS[n]).forEach(([day, sess]) =>
+    sess.exercises.forEach(ex => { idx[ex.id] = { ex, day, meso: n }; })));
+  return idx;
+})();
+
+function normName(name) {
+  return String(name).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    .replace(/\([^)]*\)/g, ' ').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+function dayOfId(id) {
+  if (EX_INDEX[id]) return EX_INDEX[id].day;
+  return DAY_PREFIX[String(id).split('_')[0]] || null;
+}
+function nameOfId(id) {
+  if (EX_INDEX[id]) return EX_INDEX[id].ex.name;
+  return ARCHIVED_EXERCISE_NAMES[id] || null;
+}
+
 function exById(id) {
-  for (const day of Object.values(SESSIONS)) {
-    const ex = day.exercises.find(e => e.id === id);
-    if (ex) return ex;
-  }
+  const cur = Object.values(SESSIONS).flatMap(d => d.exercises).find(e => e.id === id);
+  if (cur) return cur;
+  if (EX_INDEX[id]) return { ...EX_INDEX[id].ex, archived: true };
   if (ARCHIVED_EXERCISE_NAMES[id]) {
-    // Hereda la unidad (reps/seg) del ejercicio actual equivalente, si lo hay.
-    let successor = null;
-    for (const day of Object.values(SESSIONS)) {
-      successor = day.exercises.find(e => e.hist && e.hist.includes(id));
-      if (successor) break;
-    }
-    return { id, name: ARCHIVED_EXERCISE_NAMES[id], presc: '—', sets: 0, rest: null, archived: true, unit: successor ? successor.unit : undefined };
+    const succ = lineage(id).map(x => EX_INDEX[x]).find(Boolean);
+    return { id, name: ARCHIVED_EXERCISE_NAMES[id], presc: '—', sets: 0, rest: null, archived: true, unit: succ ? succ.ex.unit : undefined };
   }
   return null;
 }
 function unitOf(ex) { return ex && ex.unit === 'seg' ? 'seg' : 'reps'; }
 
-// El ejercicio actual + sus equivalentes de mesociclos anteriores.
+// Linaje: el ejercicio + todos sus equivalentes en otros mesociclos
+// (mismo día + mismo nombre normalizado, más los `hist` explícitos, de forma transitiva).
+const LINEAGE_CACHE = {};
 function lineage(exId) {
-  const ex = exById(exId);
-  return [exId, ...(ex && ex.hist ? ex.hist : [])];
+  if (LINEAGE_CACHE[exId]) return LINEAGE_CACHE[exId];
+  const allIds = [...Object.keys(EX_INDEX), ...Object.keys(ARCHIVED_EXERCISE_NAMES)];
+  const keyOf = id => { const d = dayOfId(id), n = nameOfId(id); return d && n ? d + '|' + normName(n) : null; };
+  const byKey = {};
+  allIds.forEach(id => { const k = keyOf(id); if (k) (byKey[k] = byKey[k] || []).push(id); });
+  // hist explícitos en ambas direcciones
+  const links = {};
+  const link = (a, b) => { (links[a] = links[a] || new Set()).add(b); (links[b] = links[b] || new Set()).add(a); };
+  Object.values(EX_INDEX).forEach(({ ex }) => (ex.hist || []).forEach(h => link(ex.id, h)));
+
+  const seen = new Set([exId]); const queue = [exId];
+  while (queue.length) {
+    const id = queue.shift();
+    const k = keyOf(id);
+    const next = [...(k ? byKey[k] : []), ...(links[id] ? [...links[id]] : [])];
+    next.forEach(n => { if (!seen.has(n)) { seen.add(n); queue.push(n); } });
+  }
+  const res = [...seen];
+  res.forEach(id => { LINEAGE_CACHE[id] = res; });
+  return res;
 }
 
 // Historial de un ejercicio (incluye mesociclos anteriores), ordenado por fecha.
@@ -948,6 +1097,7 @@ function importBackupJSON(input) {
     if (data.meso_state && typeof data.meso_state === 'object') setState(data.meso_state);
     localStorage.setItem('meso_archives', JSON.stringify(Array.isArray(data.meso_archives) ? data.meso_archives : []));
     migrateData();
+    resolveProgram();
     closeSettings();
     goHome();
     alert(`Respaldo restaurado: ${nNew} series. Si quieres que la Google Sheet refleje esto, usa "Resincronizar Sheet".`);
@@ -1120,7 +1270,7 @@ function renderHome() {
   const dayKey = todayKey();
   const week = computeCurrentWeek(s);
 
-  document.getElementById('home-meso-badge').textContent = `Mesociclo ${s.mesocycle}`;
+  document.getElementById('home-meso-badge').textContent = `Mesociclo ${s.mesocycle}` + (ACTIVE_PROGRAM !== s.mesocycle ? ` · programa ${ACTIVE_PROGRAM}` : '');
   document.getElementById('home-week-badge').textContent = `Semana ${week} / 8`;
 
   renderAlerts(s);
@@ -1226,7 +1376,7 @@ function renderSession(dayKey) {
         item.className = 'group-ex-item' + (done ? ' done' : '');
         item.onclick = () => openExercise(ge.id);
         item.innerHTML = `
-          <div class="grp-label ${ge.groupRole}">${ge.groupRole}</div>
+          <div class="grp-label ${ge.groupRole}">${({A:'A',B:'B',calf:'P',abs:'Ab'})[ge.groupRole] || ge.groupRole}</div>
           <div class="ex-details">
             <div class="ex-name">${ge.name}</div>
             <div class="ex-presc">${ge.presc}</div>
@@ -1483,7 +1633,7 @@ function renderProgress(exId) {
 // ══════════════════════════════════════════════
 function openSettings() {
   const s = getState();
-  document.getElementById('settings-meso-num').value = s.mesocycle || CURRENT_MESO;
+  document.getElementById('settings-meso-num').value = s.mesocycle || LATEST_MESO;
   document.getElementById('settings-start-date').value = s.startDate || localISO();
   document.getElementById('settings-week-computed').textContent = `Semana calculada: ${computeCurrentWeek(s)} / 8`;
   refreshSyncUI();
@@ -1501,6 +1651,7 @@ function saveSettings() {
   if (mNum > 0) s.mesocycle = mNum;
   if (startDate) s.startDate = startDate;
   setState(s);
+  resolveProgram();
   closeSettings();
   renderHome();
 }
@@ -1511,13 +1662,14 @@ function archiveMesocycle() {
   const archives = getArchives();
   archives.push({ mesocycle: s.mesocycle, startDate: s.startDate, archivedAt: new Date().toISOString() });
   localStorage.setItem('meso_archives', JSON.stringify(archives));
-  s.mesocycle = (s.mesocycle || CURRENT_MESO) + 1;
+  s.mesocycle = (s.mesocycle || LATEST_MESO) + 1;
   s.startDate = localISO();
   setState(s);
+  resolveProgram();
   closeSettings();
   renderHome();
   alert(`Mesociclo ${s.mesocycle - 1} archivado. Empieza el Mesociclo ${s.mesocycle}.` +
-    (s.mesocycle > CURRENT_MESO ? `\n\nRecuerda: el programa de ejercicios sigue siendo el del mesociclo ${CURRENT_MESO} hasta que lo cambies en el código.` : ''));
+    (PROGRAMS[s.mesocycle] ? `\n\nPrograma del mesociclo ${s.mesocycle} cargado.` : `\n\nOjo: todavía no hay programa del mesociclo ${s.mesocycle} en el código. Se sigue usando el del mesociclo ${ACTIVE_PROGRAM}.`));
 }
 
 // ══════════════════════════════════════════════
@@ -1525,6 +1677,7 @@ function archiveMesocycle() {
 // ══════════════════════════════════════════════
 function init() {
   initState();
+  resolveProgram();
   migrateData();
 
   // Pide al navegador que no borre los datos por falta de espacio / inactividad.
